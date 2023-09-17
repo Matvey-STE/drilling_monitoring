@@ -1,6 +1,5 @@
 package org.matveyvs.dao;
 
-import org.matveyvs.entity.Directional;
 import org.matveyvs.entity.DownholeData;
 import org.matveyvs.exception.DaoException;
 import org.matveyvs.utils.ConnectionManager;
@@ -50,7 +49,7 @@ public class DownholeDataDao implements Dao<Long, DownholeData> {
             if (keys.next()) {
                 id = keys.getLong("id");
             }
-            return new DownholeData(id, downholeData.measureDate(), downholeData.directional(),
+            return new DownholeData(id, downholeData.measuredDate(), downholeData.directional(),
                     downholeData.gamma());
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -131,7 +130,7 @@ public class DownholeDataDao implements Dao<Long, DownholeData> {
     }
 
     private static void setDirectionalIntoStatement(DownholeData downholeData, PreparedStatement statement) throws SQLException {
-        statement.setTimestamp(1, downholeData.measureDate());
+        statement.setTimestamp(1, downholeData.measuredDate());
         statement.setLong(2, downholeData.directional().id());
         statement.setLong(3, downholeData.gamma().id());
     }

@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.matveyvs.entity.Directional;
 import org.matveyvs.entity.DownholeData;
 import org.matveyvs.entity.Gamma;
-import org.matveyvs.entity.SurfaceData;
 import org.matveyvs.utils.ConnectionManager;
 
 import java.sql.*;
@@ -79,7 +78,7 @@ class DownholeDataDaoTest {
         DownholeData saved = downholeDataDao.save(test);
 
         assertNotNull(saved);
-        assertEquals(test.measureDate(), saved.measureDate());
+        assertEquals(test.measuredDate(), saved.measuredDate());
         assertEquals(test.directional(), saved.directional());
         assertEquals(test.gamma(), saved.gamma());
 
@@ -110,7 +109,7 @@ class DownholeDataDaoTest {
         assertTrue(optional.isPresent());
         DownholeData find = optional.get();
         assertEquals(saved.id(), find.id());
-        assertEquals(test.measureDate(), find.measureDate());
+        assertEquals(test.measuredDate(), find.measuredDate());
 
         testKey = saved.id();
     }
@@ -130,7 +129,7 @@ class DownholeDataDaoTest {
 
         Optional<DownholeData> find = downholeDataDao.findById(updatedObject.id());
         assertTrue(find.isPresent());
-        assertEquals(updatedObject.measureDate(), find.get().measureDate());
+        assertEquals(updatedObject.measuredDate(), find.get().measuredDate());
         testKey = updatedObject.id();
     }
 
