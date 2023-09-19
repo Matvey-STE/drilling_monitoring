@@ -19,7 +19,7 @@ class UserDaoTest {
     private static long newWellDataIdPointToReset;
     private long testKey;
     private UserDao userDao;
-    private WellDataDao wellDataDao;
+    private final WellDataDao wellDataDao = WellDataDao.getInstance();
     private Connection connection;
     private static final String DELETE_SQL = """
             DELETE FROM users
@@ -31,18 +31,18 @@ class UserDaoTest {
             """;
 
     private String getResetIdTableSql() {
-        return "ALTER SEQUENCE postgres.public.users_user_id_seq RESTART WITH " + newIdPointToReset;
+        return "ALTER SEQUENCE drilling.public.users_user_id_seq RESTART WITH " + newIdPointToReset;
     }
 
     private String getWellResetIdTableSql() {
-        return "ALTER SEQUENCE postgres.public.well_data_id_seq RESTART WITH " + newWellDataIdPointToReset;
+        return "ALTER SEQUENCE drilling.public.well_data_id_seq RESTART WITH " + newWellDataIdPointToReset;
     }
 
 
     @BeforeEach
     void setUp() {
         userDao = UserDao.getInstance();
-        wellDataDao = WellDataDao.getInstance();
+//        wellDataDao = WellDataDao.getInstance();
 
         wellData = wellDataDao.save(getWellObject());
         connection = ConnectionManager.open();
@@ -57,9 +57,9 @@ class UserDaoTest {
         statement.setLong(1, testKey);
         statement.executeUpdate();
 
-        PreparedStatement statementGam = connection.prepareStatement(DELETE_DIR_SQL);
-        statementGam.setLong(1, wellData.id());
-        statementGam.executeUpdate();
+        PreparedStatement statementWell = connection.prepareStatement(DELETE_DIR_SQL);
+        statementWell.setLong(1, wellData.id());
+        statementWell.executeUpdate();
 
         Statement resetStatementId = connection.createStatement();
         resetStatementId.execute(getResetIdTableSql());
@@ -77,24 +77,9 @@ class UserDaoTest {
     }
 
     private static WellData getWellObject() {
-        return new WellData(1L, "Test", "Test", "Test",
-                "Test", getSurfaceDataObject(), getDownholeDataObject());
+        return new WellData("Test", "Test", "Test",
+                "Test");
     }
-
-    private static DownholeData getDownholeDataObject() {
-        return new DownholeData(1L, Timestamp.valueOf(LocalDateTime.now()),
-                new Directional(1L, 22.22, 22.22, 22.22, 22.22,
-                        22.22, 22.22, 22.22, 22.22, 22.22,
-                        22.22, 22.22, 22.22), new Gamma(1L, 22.22, 22.22)
-        );
-    }
-
-    private static SurfaceData getSurfaceDataObject() {
-        return new SurfaceData(1L, Timestamp.valueOf(LocalDateTime.now()),
-                22.22, 22.22, 22.22,
-                22.22, 22.22, 22.22, 22.22);
-    }
-
 
     @Test
     void save() {
@@ -141,17 +126,13 @@ class UserDaoTest {
 
     @Test
     void update() {
-        User test = getObject();
-
-        User saved = userDao.save(test);
+        User saved = userDao.save(getObject());
 
         User updatedObject = new User(saved.id(), "updatedTest", "updatedTest", "updatedTestupdatedTest", Status.ADMIN, Timestamp.valueOf(LocalDateTime.now()),
                 Timestamp.valueOf(LocalDateTime.now()), "updatedTest", "updatedTest", wellData);
-
         boolean updated = userDao.update(updatedObject);
 
         assertTrue(updated);
-
         Optional<User> find = userDao.findById(updatedObject.id());
         assertTrue(find.isPresent());
         assertEquals(updatedObject.id(), find.get().id());

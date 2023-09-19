@@ -10,10 +10,11 @@ public class DownholeDataService {
 
     private final DownholeDataDao downholeDataDao = DownholeDataDao.getInstance();
 
-    public List<DownholeDataDto> findAll() {
-        return downholeDataDao.findAll().stream()
-                .map(downholeData -> new DownholeDataDto(downholeData.id(), downholeData.measuredDate(),
-                        downholeData.directional(), downholeData.gamma())).toList();
+
+    public List<DownholeDataDto> findAllByWellId(Long wellDataId) {
+        return downholeDataDao.findAllByWellId(wellDataId).stream()
+                .map(downholeData -> new DownholeDataDto(downholeData.id(),
+                        downholeData.wellData())).toList();
     }
 
     private DownholeDataService() {

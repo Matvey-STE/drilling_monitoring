@@ -1,7 +1,10 @@
 package org.matveyvs.entity;
 
-public record Gamma(Long id, Double measuredDepth, Double grcx) {
-    public Gamma(Double measuredDepth, Double grcx) {
-        this(null, measuredDepth, grcx);
+import java.sql.Timestamp;
+
+public record Gamma(Long id, Timestamp timestamp, Double measuredDepth, Double grcx, DownholeData downholeData) {
+    public Gamma(Timestamp timestamp, Double measuredDepth, Double grcx, DownholeData downholeData) {
+        this(null, timestamp, measuredDepth, grcx, downholeData);
     }
 }
+

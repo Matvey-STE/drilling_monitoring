@@ -11,31 +11,34 @@ import java.util.Optional;
 
 public class DownholeDataDao implements Dao<Long, DownholeData> {
     private static final DownholeDataDao INSTANCE = new DownholeDataDao();
-    private static final DirectionalDao directionalDao = DirectionalDao.getInstance();
-    private static final GammaDao gammaDao = GammaDao.getInstance();
-
+    private static final WellDataDao wellDataDao = WellDataDao.getInstance();
     private static final String SAVE_SQL = """
             INSERT INTO downhole_data
-            (measure_date, directional_id, gamma_id) 
-            VALUES (?,?,?)
+            ( welldata_id) 
+            VALUES (?)
             """;
     private static final String FIND_ALL_SQL = """
             SELECT 
-            id, measure_date, directional_id, gamma_id
+            id, welldata_id
             FROM downhole_data;
             """;
     private static final String FIND_BY_ID_SQL = """
-            SELECT id, measure_date, directional_id, gamma_id
+            SELECT id, welldata_id
             FROM  downhole_data WHERE id = ?;
             """;
     private static final String UPDATE_FLIGHT_BY_ID = """
             UPDATE downhole_data
-            SET  measure_date = ?, directional_id = ?, gamma_id = ?
+            SET  welldata_id = ?
             WHERE id = ?;
             """;
     private static final String DELETE_SQL = """
             DELETE FROM downhole_data
             WHERE id = ?
+            """;
+    private static final String FIND_ALL_BY_WELL_ID = """
+            SELECT 
+            id, welldata_id
+            FROM downhole_data WHERE welldata_id = ?;
             """;
 
     @Override
@@ -49,8 +52,7 @@ public class DownholeDataDao implements Dao<Long, DownholeData> {
             if (keys.next()) {
                 id = keys.getLong("id");
             }
-            return new DownholeData(id, downholeData.measuredDate(), downholeData.directional(),
-                    downholeData.gamma());
+            return new DownholeData(id, downholeData.wellData());
         } catch (SQLException e) {
             throw new DaoException(e);
         }
@@ -60,6 +62,21 @@ public class DownholeDataDao implements Dao<Long, DownholeData> {
     public List<DownholeData> findAll() {
         try (var connection = ConnectionManager.open();
              var statement = connection.prepareStatement(FIND_ALL_SQL)) {
+            List<DownholeData> list = new ArrayList<>();
+            var result = statement.executeQuery();
+            while (result.next()) {
+                list.add(buildDownholeData(result));
+            }
+            return list;
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    public List<DownholeData> findAllByWellId(Long welldataId) {
+        try (var connection = ConnectionManager.open();
+             var statement = connection.prepareStatement(FIND_ALL_BY_WELL_ID)) {
+            statement.setLong(1, welldataId);
             List<DownholeData> list = new ArrayList<>();
             var result = statement.executeQuery();
             while (result.next()) {
@@ -99,7 +116,7 @@ public class DownholeDataDao implements Dao<Long, DownholeData> {
         try (var connection = ConnectionManager.open();
              var statement = connection.prepareStatement(UPDATE_FLIGHT_BY_ID)) {
             setDirectionalIntoStatement(downholeData, statement);
-            statement.setDouble(4, downholeData.id());
+            statement.setDouble(2, downholeData.id());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -120,19 +137,13 @@ public class DownholeDataDao implements Dao<Long, DownholeData> {
 
     private DownholeData buildDownholeData(ResultSet result) throws SQLException {
         return new DownholeData(result.getLong("id"),
-                result.getTimestamp("measure_date"),
-                directionalDao.findById(result.getLong("directional_id"),
-                                result.getStatement().getConnection())
-                        .orElse(null),
-                gammaDao.findById(result.getLong("gamma_id"),
+                wellDataDao.findById(result.getLong("welldata_id"),
                                 result.getStatement().getConnection())
                         .orElse(null));
     }
 
     private static void setDirectionalIntoStatement(DownholeData downholeData, PreparedStatement statement) throws SQLException {
-        statement.setTimestamp(1, downholeData.measuredDate());
-        statement.setLong(2, downholeData.directional().id());
-        statement.setLong(3, downholeData.gamma().id());
+        statement.setLong(1, downholeData.wellData().id());
     }
 
     private DownholeDataDao() {

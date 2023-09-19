@@ -11,25 +11,31 @@ import java.util.Optional;
 
 public class SurfaceDataDao implements Dao<Long, SurfaceData> {
     private static final SurfaceDataDao INSTANCE = new SurfaceDataDao();
+    private static final WellDataDao wellDataDao = WellDataDao.getInstance();
 
     private static final String SAVE_SQL = """
             INSERT INTO surface_data
-            (measure_date, mdepth, hole_depth, tvdepth, hookload, wob, block_pos, standpipe_pr) 
-            VALUES (?,?,?,?,?,?,?,?)
+            (measure_date, mdepth, hole_depth, tvdepth, hookload, wob, block_pos, standpipe_pr, welldata_id) 
+            VALUES (?,?,?,?,?,?,?,?,?)
             """;
     private static final String FIND_ALL_SQL = """
             SELECT 
-            id, measure_date, mdepth, hole_depth, tvdepth, hookload, wob, block_pos, standpipe_pr
+            id, measure_date, mdepth, hole_depth, tvdepth, hookload, wob, block_pos, standpipe_pr, welldata_id
             FROM surface_data;
             """;
+    private static final String FIND_ALL_BY_DOWNHOLE_ID = """
+            SELECT 
+            id, measure_date, mdepth, hole_depth, tvdepth, hookload, wob, block_pos, standpipe_pr, welldata_id
+            FROM surface_data WHERE welldata_id = ?;
+            """;
     private static final String FIND_BY_ID_SQL = """
-            SELECT id, measure_date, mdepth, hole_depth, tvdepth, hookload, wob, block_pos, standpipe_pr
+            SELECT id, measure_date, mdepth, hole_depth, tvdepth, hookload, wob, block_pos, standpipe_pr, welldata_id
             FROM  surface_data WHERE id = ?;
             """;
     private static final String UPDATE_FLIGHT_BY_ID = """
             UPDATE surface_data
             SET measure_date = ?, mdepth = ?, hole_depth = ?, tvdepth = ?, hookload = ?, 
-                 wob = ?, block_pos = ?, standpipe_pr = ?
+                 wob = ?, block_pos = ?, standpipe_pr = ?, welldata_id = ?
             WHERE id = ?;
             """;
     private static final String DELETE_SQL = """
@@ -51,7 +57,8 @@ public class SurfaceDataDao implements Dao<Long, SurfaceData> {
             }
             return new SurfaceData(id, surfaceData.measuredDate(), surfaceData.measuredDepth(),
                     surfaceData.holeDepth(), surfaceData.tvDepth(), surfaceData.hookload(),
-                    surfaceData.wob(), surfaceData.blockPos(), surfaceData.standpipePressure());
+                    surfaceData.wob(), surfaceData.blockPos(), surfaceData.standpipePressure(),
+                    surfaceData.wellData());
         } catch (SQLException e) {
             throw new DaoException(e);
         }
@@ -61,6 +68,21 @@ public class SurfaceDataDao implements Dao<Long, SurfaceData> {
     public List<SurfaceData> findAll() {
         try (var connection = ConnectionManager.open();
              var statement = connection.prepareStatement(FIND_ALL_SQL)) {
+            List<SurfaceData> list = new ArrayList<>();
+            var result = statement.executeQuery();
+            while (result.next()) {
+                list.add(buildSurfaceData(result));
+            }
+            return list;
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    public List<SurfaceData> findAllByDownholeId(Long downholeId) {
+        try (var connection = ConnectionManager.open();
+             var statement = connection.prepareStatement(FIND_ALL_BY_DOWNHOLE_ID)) {
+            statement.setLong(1, downholeId);
             List<SurfaceData> list = new ArrayList<>();
             var result = statement.executeQuery();
             while (result.next()) {
@@ -100,7 +122,7 @@ public class SurfaceDataDao implements Dao<Long, SurfaceData> {
         try (var connection = ConnectionManager.open();
              var statement = connection.prepareStatement(UPDATE_FLIGHT_BY_ID)) {
             setSurfaceDataIntoStatement(surfaceData, statement);
-            statement.setDouble(9, surfaceData.id());
+            statement.setDouble(10, surfaceData.id());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -128,7 +150,10 @@ public class SurfaceDataDao implements Dao<Long, SurfaceData> {
                 result.getDouble("hookload"),
                 result.getDouble("wob"),
                 result.getDouble("block_pos"),
-                result.getDouble("standpipe_pr"));
+                result.getDouble("standpipe_pr"),
+                wellDataDao.findById(result.getLong("welldata_id"),
+                        result.getStatement().getConnection()).orElse(null));
+
     }
 
     private static void setSurfaceDataIntoStatement(SurfaceData surfaceData, PreparedStatement statement) throws SQLException {
@@ -140,6 +165,7 @@ public class SurfaceDataDao implements Dao<Long, SurfaceData> {
         statement.setDouble(6, surfaceData.wob());
         statement.setDouble(7, surfaceData.blockPos());
         statement.setDouble(8, surfaceData.standpipePressure());
+        statement.setLong(9, surfaceData.wellData().id());
     }
 
     private SurfaceDataDao() {

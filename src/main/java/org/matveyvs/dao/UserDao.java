@@ -2,7 +2,6 @@ package org.matveyvs.dao;
 
 import org.matveyvs.entity.Status;
 import org.matveyvs.entity.User;
-import org.matveyvs.entity.WellData;
 import org.matveyvs.exception.DaoException;
 import org.matveyvs.utils.ConnectionManager;
 
@@ -20,23 +19,23 @@ public class UserDao implements Dao<Long, User> {
 
     private static final String SAVE_SQL = """
             INSERT INTO users
-            (username, email, password, status, created_at, last_login_at, first_name, last_name, well_data_id) 
+            (username, email, password, status, created_at, last_login_at, first_name, last_name, welldata_id) 
             VALUES (?,?,?,?,?,?,?,?,?)
             """;
     private static final String FIND_ALL_SQL = """
             SELECT 
-            user_id, username, email, password, status, created_at, last_login_at, first_name, last_name, well_data_id
+            user_id, username, email, password, status, created_at, last_login_at, first_name, last_name, welldata_id
             FROM users;
             """;
     private static final String FIND_BY_ID_SQL = """
-            SELECT user_id, username, email, password, status, created_at, last_login_at, first_name, last_name, well_data_id
+            SELECT user_id, username, email, password, status, created_at, last_login_at, first_name, last_name, welldata_id
             FROM  users WHERE user_id = ?;
             """;
     private static final String UPDATE_FLIGHT_BY_ID = """
             UPDATE users
             SET   username = ?, email = ?, password = ?,
             status = ?, created_at = ?, last_login_at = ?,
-            first_name = ?, last_name = ?
+            first_name = ?, last_name = ?, welldata_id = ?
             WHERE user_id = ?;
             """;
     private static final String DELETE_SQL = """
@@ -99,7 +98,7 @@ public class UserDao implements Dao<Long, User> {
         try (var connection = ConnectionManager.open();
              var statement = connection.prepareStatement(UPDATE_FLIGHT_BY_ID)) {
             setUserIntoStatement(user, statement);
-            statement.setDouble(9, user.id());
+            statement.setDouble(10, user.id());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -128,7 +127,7 @@ public class UserDao implements Dao<Long, User> {
                 result.getTimestamp("last_login_at"),
                 result.getString("first_name"),
                 result.getString("last_name"),
-                wellDataDao.findById(result.getLong("well_data_id"),
+                wellDataDao.findById(result.getLong("welldata_id"),
                                 result.getStatement().getConnection())
                         .orElse(null));
     }

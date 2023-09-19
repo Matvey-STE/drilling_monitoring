@@ -1,6 +1,5 @@
 package org.matveyvs.dao;
 
-import org.matveyvs.entity.DownholeData;
 import org.matveyvs.entity.WellData;
 import org.matveyvs.exception.DaoException;
 import org.matveyvs.utils.ConnectionManager;
@@ -12,27 +11,25 @@ import java.util.Optional;
 
 public class WellDataDao implements Dao<Long, WellData> {
     private static final WellDataDao INSTANCE = new WellDataDao();
-    private static final SurfaceDataDao surfaceDataDao = SurfaceDataDao.getInstance();
-    private static final DownholeDataDao downholeDataDao = DownholeDataDao.getInstance();
 
     private static final String SAVE_SQL = """
             INSERT INTO well_data
-            (company_name, field_name, well_cluster, well, surface_data_id, downhole_data_id) 
-            VALUES (?,?,?,?,?,?)
+            (company_name, field_name, well_cluster, well) 
+            VALUES (?,?,?,?)
             """;
     private static final String FIND_ALL_SQL = """
             SELECT 
-            id, company_name, field_name, well_cluster, well, surface_data_id, downhole_data_id
+            id, company_name, field_name, well_cluster, well
             FROM well_data;
             """;
     private static final String FIND_BY_ID_SQL = """
-            SELECT id, company_name, field_name, well_cluster, well, surface_data_id, downhole_data_id
+            SELECT id, company_name, field_name, well_cluster, well
             FROM  well_data WHERE id = ?;
             """;
     private static final String UPDATE_FLIGHT_BY_ID = """
             UPDATE well_data
             SET   company_name = ?, field_name = ?, well_cluster = ?,
-            well = ?, surface_data_id = ?, downhole_data_id = ?
+            well = ?
             WHERE id = ?;
             """;
     private static final String DELETE_SQL = """
@@ -52,8 +49,7 @@ public class WellDataDao implements Dao<Long, WellData> {
                 id = keys.getLong("id");
             }
             return new WellData(id, wellData.companyName(), wellData.fieldName(),
-                    wellData.wellCluster(), wellData.well(), wellData.surfaceData(),
-                    wellData.downholeData());
+                    wellData.wellCluster(), wellData.well());
         } catch (SQLException e) {
             throw new DaoException(e);
         }
@@ -102,7 +98,7 @@ public class WellDataDao implements Dao<Long, WellData> {
         try (var connection = ConnectionManager.open();
              var statement = connection.prepareStatement(UPDATE_FLIGHT_BY_ID)) {
             setDirectionalIntoStatement(wellData, statement);
-            statement.setDouble(7, wellData.id());
+            statement.setDouble(5, wellData.id());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -126,13 +122,7 @@ public class WellDataDao implements Dao<Long, WellData> {
                 result.getString("company_name"),
                 result.getString("field_name"),
                 result.getString("well_cluster"),
-                result.getString("well"),
-                surfaceDataDao.findById(result.getLong("surface_data_id"),
-                                result.getStatement().getConnection())
-                        .orElse(null),
-                downholeDataDao.findById(result.getLong("downhole_data_id"),
-                                result.getStatement().getConnection())
-                        .orElse(null));
+                result.getString("well"));
     }
 
     private static void setDirectionalIntoStatement(WellData wellData, PreparedStatement statement) throws SQLException {
@@ -140,8 +130,6 @@ public class WellDataDao implements Dao<Long, WellData> {
         statement.setString(2, wellData.fieldName());
         statement.setString(3, wellData.wellCluster());
         statement.setString(4, wellData.well());
-        statement.setLong(5, wellData.surfaceData().id());
-        statement.setLong(6, wellData.downholeData().id());
     }
 
     private WellDataDao() {

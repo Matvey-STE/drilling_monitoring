@@ -4,9 +4,9 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.matveyvs.dto.DownholeDataDto;
-import org.matveyvs.dto.SurfaceDataDto;
+import org.matveyvs.service.DirectionalService;
 import org.matveyvs.service.DownholeDataService;
+import org.matveyvs.service.GammaService;
 import org.matveyvs.service.SurfaceDataService;
 
 import java.io.IOException;
@@ -16,6 +16,8 @@ import java.nio.charset.StandardCharsets;
 public class WellServlet extends HttpServlet {
     SurfaceDataService surfaceDataService = SurfaceDataService.getInstance();
     DownholeDataService downholeDataService = DownholeDataService.getInstance();
+    GammaService gammaService = GammaService.getInstance();
+    DirectionalService directionalService = DirectionalService.getInstance();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -24,20 +26,8 @@ public class WellServlet extends HttpServlet {
 
         String downholeDataIdParam = req.getParameter("downholeDataId");
         String surfaceDataIdParam = req.getParameter("surfaceDataId");
-
-        DownholeDataDto downholeDataDto = null;
-        if (downholeDataIdParam != null) {
-            downholeDataDto = downholeDataService.findAll().stream()
-                    .filter(dao -> dao.id().equals(Long.valueOf(downholeDataIdParam)))
-                    .findFirst().orElse(null);
-        }
-
-        SurfaceDataDto surfaceDataDto = null;
-        if (surfaceDataIdParam != null) {
-            surfaceDataDto = surfaceDataService.findAll().stream()
-                    .filter(dao -> dao.id().equals(Long.valueOf(surfaceDataIdParam)))
-                    .findFirst().orElse(null);
-        }
+        String gammaIdParam = req.getParameter("gammaId");
+        String directionalIdParam = req.getParameter("directionalId");
 
         try (var writer = resp.getWriter()) {
             writer.write("<!DOCTYPE html>");
@@ -48,28 +38,73 @@ public class WellServlet extends HttpServlet {
             writer.write("</head>");
             writer.write("<body class='container'>");
 
-            if (surfaceDataDto != null) {
+            if (surfaceDataIdParam != null) {
                 writer.write("<h1>Surface Data Information:</h1>");
 
                 writer.write("<div>");
-                writer.write("<h3>Time: " + surfaceDataDto.timestamp() + "</h3>");
-                writer.write("<h3>Measure Depth: " + surfaceDataDto.measureDepth() + "</h3>");
-                writer.write("<h3>Hole Depth: " + surfaceDataDto.holeDepth() + "</h3>");
-                writer.write("<h3>TVD Depth: " + surfaceDataDto.tvDepth() + "</h3>");
+                writer.write("<ul>");
+                surfaceDataService.findAllByDownholeId(Long.valueOf(surfaceDataIdParam)).forEach(surfaceData ->
+                        writer.write("""
+                            <li>
+                            <h4>Date: %s </h4>
+                            <h4>Depth: %s  Hole depth: %s  TVD: %s</h4>
+                            </li>""".formatted(surfaceData.measureDate(), surfaceData.measureDepth(),
+                                surfaceData.holeDepth(), surfaceData.tvDepth())));
+                writer.write("</ul>");
                 writer.write("</div>");
             }
 
-            if (downholeDataDto != null) {
+            if (gammaIdParam != null) {
+                writer.write("<h1>Gamma Data Information:</h1>");
+                writer.write("<div>");
+                writer.write("<ul>");
+                gammaService.findAllByDownholeId(Long.valueOf(gammaIdParam)).forEach(gammaDto ->
+                        writer.write("""
+                            <li>
+                            <h4>%s) Date: %s </h4>
+                            <h4>Downhole depth: %s</h4>
+                            <h4>Gamma value: %s</h4>               
+                            </li>""".formatted(gammaDto.id(), gammaDto.measureDate(), gammaDto.measureDepth(), gammaDto.grcx())));
+                writer.write("</ul>");
+                writer.write("</div>");
+            }
+            if (directionalIdParam != null) {
+                writer.write("<h1>Directional Data Information:</h1>");
+                System.out.println(directionalService.findAllByDownholeId(Long.valueOf(directionalIdParam)));
+                writer.write("<div>");
+                writer.write("<ul>");
+                directionalService.findAllByDownholeId(Long.valueOf(directionalIdParam)).forEach(dirDto ->
+                        writer.write("""
+                            <li>
+                            <h4>%s) Date: %s </h4>
+                            <h4>Downhole depth: %s</h4>
+                            <h4>Inclination: %s Azimuth corr: %s Azimuth true: %s</h4>               
+                            </li>""".formatted(dirDto.id(), dirDto.measureDate(), dirDto.measureDepth(),
+                                dirDto.inc(), dirDto.azCorr(), dirDto.azTrue())));
+                writer.write("</ul>");
+                writer.write("</div>");
+            }
+            if (downholeDataIdParam != null) {
                 writer.write("<h1>Downhole Data Information:</h1>");
 
-                writer.write("<div>");
-                writer.write("<h3>Time: " + downholeDataDto.timestamp() + "</h3>");
-                writer.write("<h3>Directional Info: " + downholeDataDto.directional() + "</h3>");
-                writer.write("<h3>Gamma Info: " + downholeDataDto.gamma() + "</h3>");
+                writer.write("<ul>");
+                downholeDataService.findAllByWellId(Long.valueOf(downholeDataIdParam)).forEach(wellDataDto ->
+                        writer.write("""
+                            <li>
+                            <h4>Company name: %s</h4>
+                            <h4>Field name: %s</h4>
+                            <h4>Well cluster: %s  Well: %s</h4>               
+                            <h3><a href='/well?directionalId=%d'>Directional Info</a></h3>
+                            <h3><a href='/well?gammaId=%d'>Gamma Info</a></h3>
+                            </li>""".formatted(wellDataDto.wellData().companyName(), wellDataDto.wellData().fieldName(),
+                                wellDataDto.wellData().wellCluster(), wellDataDto.wellData().well(), wellDataDto.id(),
+                                wellDataDto.id())));
+                writer.write("</ul>");
+
                 writer.write("</div>");
             }
-
-            if (surfaceDataDto == null && downholeDataDto == null) {
+            if (surfaceDataIdParam == null && downholeDataIdParam == null
+                && gammaIdParam == null && directionalIdParam == null) {
                 writer.write("<p class='error'>No valid data specified.</p>");
             }
 

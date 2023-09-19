@@ -3,42 +3,46 @@ package org.matveyvs.dao;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.matveyvs.entity.Directional;
 import org.matveyvs.entity.DownholeData;
-import org.matveyvs.entity.Gamma;
+import org.matveyvs.entity.WellData;
 import org.matveyvs.utils.ConnectionManager;
 
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class DownholeDataDaoTest {
-    private static Directional directionalTest;
-    private static Gamma gammaTest;
+    private static WellData wellData;
     private static long newIdPointToReset;
     private long testKey;
     private DownholeDataDao downholeDataDao;
+    private final WellDataDao wellDataDao = WellDataDao.getInstance();
     private Connection connection;
     private static final String DELETE_SQL = """
             DELETE FROM downhole_data
             WHERE id = ?
             """;
+    private static final String DELETE_WELLDATA_SQL = """
+            DELETE FROM well_data
+            WHERE id = ?
+            """;
 
+    private String getWellIdTableSql() {
+        return "ALTER SEQUENCE drilling.public.well_data_id_seq RESTART WITH " + newIdPointToReset;
+    }
 
     private String getResetIdTableSql() {
-        return "ALTER SEQUENCE postgres.public.downhole_data_id_seq RESTART WITH " + newIdPointToReset;
+        return "ALTER SEQUENCE drilling.public.downhole_data_id_seq RESTART WITH " + newIdPointToReset;
     }
 
     @BeforeEach
     void setUp() {
         downholeDataDao = DownholeDataDao.getInstance();
 
+        wellData = wellDataDao.save(getWellObject());
 
-        directionalTest = getDirectionalObject();
-        gammaTest = getGammaObject();
         connection = ConnectionManager.open();
 
         newIdPointToReset = downholeDataDao.findAll().size() + 1;
@@ -50,25 +54,28 @@ class DownholeDataDaoTest {
         statement.setLong(1, testKey);
         statement.executeUpdate();
 
+
+        PreparedStatement statement2 = connection.prepareStatement(DELETE_WELLDATA_SQL);
+        statement2.setLong(1, wellData.id());
+        statement2.executeUpdate();
+
+
         Statement resetStatementId = connection.createStatement();
         resetStatementId.execute(getResetIdTableSql());
+
+        Statement resetStatementId2 = connection.createStatement();
+        resetStatementId2.execute(getWellIdTableSql());
 
         connection.close();
     }
 
     private static DownholeData getObject() {
-        return new DownholeData(Timestamp.valueOf(LocalDateTime.now()),
-                directionalTest, gammaTest);
+        return new DownholeData(wellData);
     }
 
-    private static Gamma getGammaObject() {
-        return new Gamma(1L,22.22, 22.22);
-    }
-
-    private static Directional getDirectionalObject() {
-        return new Directional(1L,22.22, 22.22, 22.22, 22.22,
-                22.22, 22.22, 22.22, 22.22, 22.22,
-                22.22, 22.22, 22.22);
+    private static WellData getWellObject() {
+        return new WellData("Test", "Test", "Test",
+                "Test");
     }
 
     @Test
@@ -78,9 +85,7 @@ class DownholeDataDaoTest {
         DownholeData saved = downholeDataDao.save(test);
 
         assertNotNull(saved);
-        assertEquals(test.measuredDate(), saved.measuredDate());
-        assertEquals(test.directional(), saved.directional());
-        assertEquals(test.gamma(), saved.gamma());
+        assertEquals(test.wellData(), saved.wellData());
 
         testKey = saved.id();
     }
@@ -109,7 +114,7 @@ class DownholeDataDaoTest {
         assertTrue(optional.isPresent());
         DownholeData find = optional.get();
         assertEquals(saved.id(), find.id());
-        assertEquals(test.measuredDate(), find.measuredDate());
+        assertEquals(test.wellData(), find.wellData());
 
         testKey = saved.id();
     }
@@ -120,8 +125,8 @@ class DownholeDataDaoTest {
 
         DownholeData saved = downholeDataDao.save(test);
 
-        DownholeData updatedObject = new DownholeData(saved.id(), Timestamp.valueOf(LocalDateTime.now()),
-                directionalTest, gammaTest);
+        DownholeData updatedObject = new DownholeData(saved.id(),
+                wellData);
 
         boolean updated = downholeDataDao.update(updatedObject);
 
@@ -129,7 +134,7 @@ class DownholeDataDaoTest {
 
         Optional<DownholeData> find = downholeDataDao.findById(updatedObject.id());
         assertTrue(find.isPresent());
-        assertEquals(updatedObject.measuredDate(), find.get().measuredDate());
+        assertEquals(updatedObject.wellData(), find.get().wellData());
         testKey = updatedObject.id();
     }
 

@@ -38,8 +38,7 @@ public class WellDataServlet extends HttpServlet {
                             <a href='/well?surfaceDataId=%d'>Surface Data</a>
                             <a href='/well?downholeDataId=%d'>Downhole Data</a>
                             </li>""".formatted(wellDataDto.companyName(), wellDataDto.fieldName(),
-                            wellDataDto.wellCluster(), wellDataDto.well(),
-                            wellDataDto.surfaceDataId(), wellDataDto.downholeDataId())));
+                            wellDataDto.wellCluster(), wellDataDto.well(), wellDataDto.id(), wellDataDto.id())));
             writer.write("</ul>");
 
             writer.write("</body>");

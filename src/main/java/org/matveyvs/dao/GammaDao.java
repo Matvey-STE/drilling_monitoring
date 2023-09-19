@@ -9,27 +9,35 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class GammaDao implements Dao<Long, Gamma>{
+public class GammaDao implements Dao<Long, Gamma> {
     private static final GammaDao INSTANCE = new GammaDao();
+    private static final DownholeDataDao downholeDataDao = DownholeDataDao.getInstance();
 
     private static final String SAVE_SQL = """
             INSERT INTO gamma
-            (mdepth,grcx) 
-            VALUES (?,?)
+            (measure_date, mdepth, grcx, downhole_id) 
+            VALUES (?,?,?,?)
             """;
     private static final String FIND_ALL_SQL = """
-            SELECT 
-            id, mdepth, grcx
-            FROM gamma;
-            """;
+             SELECT 
+            id, measure_date, mdepth, grcx, downhole_id
+             FROM gamma;
+             """;
+    private static final String FIND_ALL_BY_DOWNHOLE_ID = """
+             SELECT 
+            id, measure_date, mdepth, grcx, downhole_id
+             FROM gamma WHERE downhole_id = ?;
+             """;
     private static final String FIND_BY_ID_SQL = """
-            SELECT id, mdepth, grcx
+            SELECT id, measure_date, mdepth, grcx, downhole_id
             FROM  gamma WHERE id = ?;
             """;
     private static final String UPDATE_FLIGHT_BY_ID = """
             UPDATE gamma
-            SET  mdepth = ?,
-                 grcx = ?
+            SET  measure_date = ?,
+                 mdepth = ?,
+                 grcx = ?,
+                 downhole_id = ?
             WHERE id = ?;
             """;
     private static final String DELETE_SQL = """
@@ -49,7 +57,7 @@ public class GammaDao implements Dao<Long, Gamma>{
             if (keys.next()) {
                 id = keys.getLong("id");
             }
-            return new Gamma(id, gamma.measuredDepth(), gamma.grcx());
+            return new Gamma(id, gamma.timestamp(), gamma.measuredDepth(), gamma.grcx(), gamma.downholeData());
         } catch (SQLException e) {
             throw new DaoException(e);
         }
@@ -59,6 +67,21 @@ public class GammaDao implements Dao<Long, Gamma>{
     public List<Gamma> findAll() {
         try (var connection = ConnectionManager.open();
              var statement = connection.prepareStatement(FIND_ALL_SQL)) {
+            List<Gamma> list = new ArrayList<>();
+            var result = statement.executeQuery();
+            while (result.next()) {
+                list.add(buildGamma(result));
+            }
+            return list;
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    public List<Gamma> findAllByDownholeId(Long downholeId) {
+        try (var connection = ConnectionManager.open();
+             var statement = connection.prepareStatement(FIND_ALL_BY_DOWNHOLE_ID)) {
+            statement.setLong(1, downholeId);
             List<Gamma> list = new ArrayList<>();
             var result = statement.executeQuery();
             while (result.next()) {
@@ -98,7 +121,7 @@ public class GammaDao implements Dao<Long, Gamma>{
         try (var connection = ConnectionManager.open();
              var statement = connection.prepareStatement(UPDATE_FLIGHT_BY_ID)) {
             setGammaIntoStatement(gamma, statement);
-            statement.setDouble(3, gamma.id());
+            statement.setDouble(5, gamma.id());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -116,19 +139,28 @@ public class GammaDao implements Dao<Long, Gamma>{
             throw new DaoException(e);
         }
     }
+
     private Gamma buildGamma(ResultSet result) throws SQLException {
         return new Gamma(result.getLong("id"),
+                result.getTimestamp("measure_date"),
                 result.getDouble("mdepth"),
-                result.getDouble("grcx"));
+                result.getDouble("grcx"),
+                downholeDataDao.findById(result.getLong("downhole_id"),
+                                result.getStatement().getConnection())
+                        .orElse(null));
     }
 
     private static void setGammaIntoStatement(Gamma gamma, PreparedStatement statement) throws SQLException {
-        statement.setDouble(1, gamma.measuredDepth());
-        statement.setDouble(2, gamma.grcx());
+        statement.setTimestamp(1, gamma.timestamp());
+        statement.setDouble(2, gamma.measuredDepth());
+        statement.setDouble(3, gamma.grcx());
+        statement.setLong(4, gamma.downholeData().id());
     }
+
     private GammaDao() {
 
     }
+
     public static GammaDao getInstance() {
         return GammaDao.INSTANCE;
     }

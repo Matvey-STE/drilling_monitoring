@@ -3,16 +3,15 @@ package org.matveyvs.dao;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.matveyvs.entity.Directional;
-import org.matveyvs.entity.Gamma;
 import org.matveyvs.entity.SurfaceData;
+import org.matveyvs.entity.WellData;
 import org.matveyvs.utils.ConnectionManager;
 
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.SimpleTimeZone;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,20 +19,31 @@ class SurfaceDataDaoTest {
     private static long newIdPointToReset;
     private long testKey;
     private SurfaceDataDao surfaceDataDao;
+    private static WellData wellData;
+    private final WellDataDao wellDataDao = WellDataDao.getInstance();
     private Connection connection;
     private static final String DELETE_SQL = """
             DELETE FROM surface_data
             WHERE id = ?
             """;
+    private static final String DELETE_WELLDATA_SQL = """
+            DELETE FROM well_data
+            WHERE id = ?
+            """;
 
     private String getResetIdTableSql() {
-        return "ALTER SEQUENCE postgres.public.surface_data_id_seq RESTART WITH " + newIdPointToReset;
+        return "ALTER SEQUENCE drilling.public.surface_data_id_seq RESTART WITH " + newIdPointToReset;
+    }
+    private String getWellIdTableSql() {
+        return "ALTER SEQUENCE drilling.public.well_data_id_seq RESTART WITH " + newIdPointToReset;
     }
 
     @BeforeEach
     void setUp() {
         surfaceDataDao = SurfaceDataDao.getInstance();
         connection = ConnectionManager.open();
+
+        wellData = wellDataDao.save(getWellObject());
 
         newIdPointToReset = surfaceDataDao.findAll().size() + 1;
     }
@@ -44,15 +54,28 @@ class SurfaceDataDaoTest {
         statement.setLong(1, testKey);
         statement.executeUpdate();
 
+
+        PreparedStatement statement2 = connection.prepareStatement(DELETE_WELLDATA_SQL);
+        statement2.setLong(1, wellData.id());
+        statement2.executeUpdate();
+
+
+
         Statement resetStatementId = connection.createStatement();
         resetStatementId.execute(getResetIdTableSql());
+
+        Statement resetStatementId2 = connection.createStatement();
+        resetStatementId2.execute(getWellIdTableSql());
         connection.close();
     }
     private static SurfaceData getObject() {
-        SurfaceData test = new SurfaceData(Timestamp.valueOf(LocalDateTime.now()),
+        return new SurfaceData(Timestamp.valueOf(LocalDateTime.now()),
                             22.22, 22.22,22.22,
-                        22.22,22.22, 22.22,22.22);
-        return test;
+                        22.22,22.22, 22.22,22.22, wellData);
+    }
+    private static WellData getWellObject() {
+        return new WellData("Test", "Test", "Test",
+                "Test");
     }
 
     @Test
@@ -105,7 +128,7 @@ class SurfaceDataDaoTest {
 
         SurfaceData updatedObject = new SurfaceData(saved.id(),Timestamp.valueOf(LocalDateTime.now()),
                 33.33, 22.22,22.22,
-                22.22,22.22, 33.33,33.33);
+                22.22,22.22, 33.33,33.33, wellData);
 
         boolean updated = surfaceDataDao.update(updatedObject);
 

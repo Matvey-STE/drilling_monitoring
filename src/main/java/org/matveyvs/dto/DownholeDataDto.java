@@ -1,10 +1,8 @@
 package org.matveyvs.dto;
 
-import org.matveyvs.entity.Directional;
-import org.matveyvs.entity.Gamma;
+import org.matveyvs.entity.WellData;
 
-import java.sql.Timestamp;
 
-public record DownholeDataDto(Long id, Timestamp timestamp, Directional directional, Gamma gamma) {
+public record DownholeDataDto(Long id, WellData wellData) {
 
 }
