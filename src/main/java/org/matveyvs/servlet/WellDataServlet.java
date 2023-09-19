@@ -9,7 +9,7 @@ import org.matveyvs.service.WellDataService;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-@WebServlet("/wells")
+//@WebServlet("/wells")
 public class WellDataServlet extends HttpServlet {
     private final WellDataService wellDataService = WellDataService.getInstance();
 

@@ -1,6 +1,5 @@
 package org.matveyvs.servlet;
 
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,12 +11,12 @@ import org.matveyvs.service.SurfaceDataService;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-@WebServlet("/well")
+//@WebServlet("/well")
 public class WellServlet extends HttpServlet {
-    SurfaceDataService surfaceDataService = SurfaceDataService.getInstance();
-    DownholeDataService downholeDataService = DownholeDataService.getInstance();
-    GammaService gammaService = GammaService.getInstance();
-    DirectionalService directionalService = DirectionalService.getInstance();
+    private final SurfaceDataService surfaceDataService = SurfaceDataService.getInstance();
+    private final DownholeDataService downholeDataService = DownholeDataService.getInstance();
+    private final GammaService gammaService = GammaService.getInstance();
+    private final DirectionalService directionalService = DirectionalService.getInstance();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -53,18 +52,35 @@ public class WellServlet extends HttpServlet {
                 writer.write("</ul>");
                 writer.write("</div>");
             }
+            if (downholeDataIdParam != null) {
+                writer.write("<h1>Downhole Data Information:</h1>");
+                writer.write("<ul>");
+                downholeDataService.findAllByWellId(Long.valueOf(downholeDataIdParam)).forEach(wellDataDto ->
+                        writer.write("""
+                            <li>
+                            <h4>Company name: %s</h4>
+                            <h4>Field name: %s</h4>
+                            <h4>Well cluster: %s  Well: %s</h4>               
+                            <h3><a href='/well?directionalId=%d'>Directional Info</a></h3>
+                            <h3><a href='/well?gammaId=%d'>Gamma Info</a></h3>
+                            </li>""".formatted(wellDataDto.wellData().companyName(), wellDataDto.wellData().fieldName(),
+                                wellDataDto.wellData().wellCluster(), wellDataDto.wellData().well(), wellDataDto.id(),
+                                wellDataDto.id())));
+                writer.write("</ul>");
 
+                writer.write("</div>");
+            }
             if (gammaIdParam != null) {
                 writer.write("<h1>Gamma Data Information:</h1>");
                 writer.write("<div>");
                 writer.write("<ul>");
                 gammaService.findAllByDownholeId(Long.valueOf(gammaIdParam)).forEach(gammaDto ->
                         writer.write("""
-                            <li>
-                            <h4>%s) Date: %s </h4>
-                            <h4>Downhole depth: %s</h4>
-                            <h4>Gamma value: %s</h4>               
-                            </li>""".formatted(gammaDto.id(), gammaDto.measureDate(), gammaDto.measureDepth(), gammaDto.grcx())));
+                                <li>
+                                <h4>%s) Date: %s </h4>
+                                <h4>Downhole depth: %s</h4>
+                                <h4>Gamma value: %s</h4>               
+                                </li>""".formatted(gammaDto.id(), gammaDto.measureDate(), gammaDto.measureDepth(), gammaDto.grcx())));
                 writer.write("</ul>");
                 writer.write("</div>");
             }
@@ -84,25 +100,7 @@ public class WellServlet extends HttpServlet {
                 writer.write("</ul>");
                 writer.write("</div>");
             }
-            if (downholeDataIdParam != null) {
-                writer.write("<h1>Downhole Data Information:</h1>");
 
-                writer.write("<ul>");
-                downholeDataService.findAllByWellId(Long.valueOf(downholeDataIdParam)).forEach(wellDataDto ->
-                        writer.write("""
-                            <li>
-                            <h4>Company name: %s</h4>
-                            <h4>Field name: %s</h4>
-                            <h4>Well cluster: %s  Well: %s</h4>               
-                            <h3><a href='/well?directionalId=%d'>Directional Info</a></h3>
-                            <h3><a href='/well?gammaId=%d'>Gamma Info</a></h3>
-                            </li>""".formatted(wellDataDto.wellData().companyName(), wellDataDto.wellData().fieldName(),
-                                wellDataDto.wellData().wellCluster(), wellDataDto.wellData().well(), wellDataDto.id(),
-                                wellDataDto.id())));
-                writer.write("</ul>");
-
-                writer.write("</div>");
-            }
             if (surfaceDataIdParam == null && downholeDataIdParam == null
                 && gammaIdParam == null && directionalIdParam == null) {
                 writer.write("<p class='error'>No valid data specified.</p>");
