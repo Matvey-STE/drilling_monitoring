@@ -14,41 +14,26 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserDaoTest {
-    private static WellData wellData;
     private static long newIdPointToReset;
-    private static long newWellDataIdPointToReset;
     private long testKey;
     private UserDao userDao;
-    private final WellDataDao wellDataDao = WellDataDao.getInstance();
     private Connection connection;
     private static final String DELETE_SQL = """
             DELETE FROM users
             WHERE user_id = ?
-            """;
-    private static final String DELETE_DIR_SQL = """
-            DELETE FROM well_data
-            WHERE id = ?
             """;
 
     private String getResetIdTableSql() {
         return "ALTER SEQUENCE drilling.public.users_user_id_seq RESTART WITH " + newIdPointToReset;
     }
 
-    private String getWellResetIdTableSql() {
-        return "ALTER SEQUENCE drilling.public.well_data_id_seq RESTART WITH " + newWellDataIdPointToReset;
-    }
-
-
     @BeforeEach
     void setUp() {
         userDao = UserDao.getInstance();
-//        wellDataDao = WellDataDao.getInstance();
 
-        wellData = wellDataDao.save(getWellObject());
         connection = ConnectionManager.open();
 
         newIdPointToReset = userDao.findAll().size() + 1;
-        newWellDataIdPointToReset = wellDataDao.findAll().size() + 1;
     }
 
     @AfterEach
@@ -57,28 +42,15 @@ class UserDaoTest {
         statement.setLong(1, testKey);
         statement.executeUpdate();
 
-        PreparedStatement statementWell = connection.prepareStatement(DELETE_DIR_SQL);
-        statementWell.setLong(1, wellData.id());
-        statementWell.executeUpdate();
-
         Statement resetStatementId = connection.createStatement();
         resetStatementId.execute(getResetIdTableSql());
-
-        Statement resetWellStatementId = connection.createStatement();
-        resetWellStatementId.execute(getWellResetIdTableSql());
 
         connection.close();
     }
 
     private static User getObject() {
-//        wellData = getWellObject();
         return new User("Test", "Test", "Test", Status.USER, Timestamp.valueOf(LocalDateTime.now()),
-                Timestamp.valueOf(LocalDateTime.now()), "Test", "Test", wellData);
-    }
-
-    private static WellData getWellObject() {
-        return new WellData("Test", "Test", "Test",
-                "Test");
+                Timestamp.valueOf(LocalDateTime.now()), "Test", "Test");
     }
 
     @Test
@@ -129,7 +101,7 @@ class UserDaoTest {
         User saved = userDao.save(getObject());
 
         User updatedObject = new User(saved.id(), "updatedTest", "updatedTest", "updatedTestupdatedTest", Status.ADMIN, Timestamp.valueOf(LocalDateTime.now()),
-                Timestamp.valueOf(LocalDateTime.now()), "updatedTest", "updatedTest", wellData);
+                Timestamp.valueOf(LocalDateTime.now()), "updatedTest", "updatedTest");
         boolean updated = userDao.update(updatedObject);
 
         assertTrue(updated);

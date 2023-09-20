@@ -15,27 +15,25 @@ import java.util.Optional;
 
 public class UserDao implements Dao<Long, User> {
     private static final UserDao INSTANCE = new UserDao();
-    private static final WellDataDao wellDataDao = WellDataDao.getInstance();
-
     private static final String SAVE_SQL = """
             INSERT INTO users
-            (username, email, password, status, created_at, last_login_at, first_name, last_name, welldata_id) 
-            VALUES (?,?,?,?,?,?,?,?,?)
+            (username, email, password, status, created_at, last_login_at, first_name, last_name) 
+            VALUES (?,?,?,?,?,?,?,?)
             """;
     private static final String FIND_ALL_SQL = """
             SELECT 
-            user_id, username, email, password, status, created_at, last_login_at, first_name, last_name, welldata_id
+            user_id, username, email, password, status, created_at, last_login_at, first_name, last_name
             FROM users;
             """;
     private static final String FIND_BY_ID_SQL = """
-            SELECT user_id, username, email, password, status, created_at, last_login_at, first_name, last_name, welldata_id
+            SELECT user_id, username, email, password, status, created_at, last_login_at, first_name, last_name
             FROM  users WHERE user_id = ?;
             """;
     private static final String UPDATE_FLIGHT_BY_ID = """
             UPDATE users
             SET   username = ?, email = ?, password = ?,
             status = ?, created_at = ?, last_login_at = ?,
-            first_name = ?, last_name = ?, welldata_id = ?
+            first_name = ?, last_name = ?
             WHERE user_id = ?;
             """;
     private static final String DELETE_SQL = """
@@ -56,7 +54,7 @@ public class UserDao implements Dao<Long, User> {
             }
             return new User(id, user.userName(), user.email(),
                     user.password(), user.status(), user.createdAt(),
-                    user.lastLoginAt(), user.firstName(), user.lastName(), user.wellData());
+                    user.lastLoginAt(), user.firstName(), user.lastName());
         } catch (SQLException e) {
             throw new DaoException(e);
         }
@@ -98,7 +96,7 @@ public class UserDao implements Dao<Long, User> {
         try (var connection = ConnectionManager.open();
              var statement = connection.prepareStatement(UPDATE_FLIGHT_BY_ID)) {
             setUserIntoStatement(user, statement);
-            statement.setDouble(10, user.id());
+            statement.setDouble(9, user.id());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -126,10 +124,7 @@ public class UserDao implements Dao<Long, User> {
                 result.getTimestamp("created_at"),
                 result.getTimestamp("last_login_at"),
                 result.getString("first_name"),
-                result.getString("last_name"),
-                wellDataDao.findById(result.getLong("welldata_id"),
-                                result.getStatement().getConnection())
-                        .orElse(null));
+                result.getString("last_name"));
     }
 
     private static void setUserIntoStatement(User user, PreparedStatement statement) throws SQLException {
@@ -141,7 +136,6 @@ public class UserDao implements Dao<Long, User> {
         statement.setTimestamp(6, user.lastLoginAt());
         statement.setString(7, user.firstName());
         statement.setString(8, user.lastName());
-        statement.setLong(9, user.wellData().id());
     }
 
     private UserDao() {
