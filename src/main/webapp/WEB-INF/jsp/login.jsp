@@ -20,9 +20,9 @@
 
     </a>
 </form>
-<c:if test="${requestScope.error != null}">
+<c:if test="${param.error != null}">
     <div style="color: red">
-        <c:forEach var="error" items="${requestScope.error}">
+        <c:forEach var="error" items="${param.error}">
             <span>Email or password is not correct</span>
         </c:forEach>
     </div>

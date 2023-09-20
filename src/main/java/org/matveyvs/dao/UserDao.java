@@ -1,5 +1,6 @@
 package org.matveyvs.dao;
 
+import org.matveyvs.dao.filter.UserDaoFilter;
 import org.matveyvs.entity.Role;
 import org.matveyvs.entity.User;
 import org.matveyvs.exception.DaoException;
@@ -12,6 +13,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class UserDao implements Dao<Long, User> {
     private static final UserDao INSTANCE = new UserDao();
@@ -23,11 +25,7 @@ public class UserDao implements Dao<Long, User> {
     private static final String FIND_ALL_SQL = """
             SELECT 
             user_id, username, email, password, role, created_at, first_name, last_name
-            FROM users;
-            """;
-    private static final String FIND_BY_EMAIL_AND_PASSWORD= """
-            SELECT user_id, username, email, password, role, created_at, first_name, last_name
-            FROM  users WHERE email = ? AND password = ?;
+            FROM users
             """;
     private static final String FIND_BY_ID_SQL = """
             SELECT user_id, username, email, password, role, created_at, first_name, last_name
@@ -78,12 +76,32 @@ public class UserDao implements Dao<Long, User> {
             throw new DaoException(e);
         }
     }
-
-    @Override
-    public Optional<User> findById(Long id) {
+    public Optional<User> findByFilter(UserDaoFilter userDaoFilter) {
+        List<Object> parameters = new ArrayList<>();
+        List<String> whereSql = new ArrayList<>();
+        if(userDaoFilter.username() != null){
+            parameters.add(userDaoFilter.username());
+            whereSql.add("username = ?");
+        }
+        if(userDaoFilter.email() != null){
+            parameters.add(userDaoFilter.email());
+            whereSql.add("email = ?");
+        }
+        if(userDaoFilter.password() != null){
+            parameters.add(userDaoFilter.password());
+            whereSql.add("password = ?");
+        }
+        String where = whereSql.stream().collect(Collectors.joining(
+                " AND ",
+                "WHERE ",
+                ""
+        ));
+        String sql = FIND_ALL_SQL+where;
         try (var connection = ConnectionManager.open();
-             var statement = connection.prepareStatement(FIND_BY_ID_SQL)) {
-            statement.setLong(1, id);
+             var statement = connection.prepareStatement(sql)) {
+            for (int i = 0; i < parameters.size(); i++) {
+                statement.setObject(i+1, parameters.get(i));
+            }
             var result = statement.executeQuery();
             User user = null;
             if (result.next()) {
@@ -94,11 +112,12 @@ public class UserDao implements Dao<Long, User> {
             throw new DaoException(e);
         }
     }
-    public Optional<User> findByEmailAndPassword(String email, String password) {
+
+    @Override
+    public Optional<User> findById(Long id) {
         try (var connection = ConnectionManager.open();
-             var statement = connection.prepareStatement(FIND_BY_EMAIL_AND_PASSWORD)) {
-            statement.setString(1, email);
-            statement.setString(2, password);
+             var statement = connection.prepareStatement(FIND_BY_ID_SQL)) {
+            statement.setLong(1, id);
             var result = statement.executeQuery();
             User user = null;
             if (result.next()) {

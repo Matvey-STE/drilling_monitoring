@@ -33,7 +33,7 @@ public class LoginServlet extends HttpServlet {
 
     @SneakyThrows
     private void onLoginFail(HttpServletRequest req, HttpServletResponse resp) {
-        resp.sendRedirect("/login?error=1&email=" + req.getParameter("email"));
+        resp.sendRedirect("/login?error=true&email=" + req.getParameter("email"));
     }
 
     @SneakyThrows

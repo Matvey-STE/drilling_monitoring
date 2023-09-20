@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.SneakyThrows;
 import org.matveyvs.dto.CreateUserDto;
 import org.matveyvs.entity.Role;
 import org.matveyvs.exception.ValidationException;
@@ -31,22 +32,32 @@ public class RegistrationServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        var exist = userService.checkIfExist(req.getParameter("username"), req.getParameter("email"));
 
-        var userDto = new CreateUserDto(
-                req.getParameter("username"),
-                req.getParameter("email"),
-                req.getParameter("password"),
-                req.getParameter("role"),
-                Timestamp.valueOf(LocalDateTime.now()),
-                req.getParameter("first_name"),
-                req.getParameter("last_name")
-        );
-        try {
-            userService.create(userDto);
-            resp.sendRedirect("/login");
-        } catch (ValidationException e) {
-            req.setAttribute("errors", e.getErrors());
-            doGet(req, resp);
+        if (exist){
+            onLoginFail(req, resp);
+        } else {
+            var userDto = new CreateUserDto(
+                    req.getParameter("username"),
+                    req.getParameter("email"),
+                    req.getParameter("password"),
+                    req.getParameter("role"),
+                    Timestamp.valueOf(LocalDateTime.now()),
+                    req.getParameter("first_name"),
+                    req.getParameter("last_name")
+            );
+            try {
+                userService.create(userDto);
+                resp.sendRedirect("/login");
+            } catch (ValidationException e) {
+                req.setAttribute("errors", e.getErrors());
+                doGet(req, resp);
+            }
         }
+    }
+    @SneakyThrows
+    private void onLoginFail(HttpServletRequest req, HttpServletResponse resp) {
+        resp.sendRedirect("/registration?error=true&username=" + req.getParameter("username")
+        + "&email=" + req.getParameter("email"));
     }
 }

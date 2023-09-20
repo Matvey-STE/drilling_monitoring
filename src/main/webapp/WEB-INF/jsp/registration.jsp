@@ -30,12 +30,21 @@
     <input type="text" id="last_name" name="last_name"><br><br>
 
     <input type="submit" value="Register">
+    <a href="${pageContext.request.contextPath}/login">
+        <button type="button">Login</button></a>
 </form>
 <c:if test="${not empty requestScope.errors}">
     <div style="color: red">
         <c:forEach var="error" items="${requestScope.errors}">
             <span>${error.message}</span>
             <br>
+        </c:forEach>
+    </div>
+</c:if>
+<c:if test="${param.error != null}">
+    <div style="color: red">
+        <c:forEach var="error" items="${param.error}">
+            <span>Username or email is already exist</span>
         </c:forEach>
     </div>
 </c:if>

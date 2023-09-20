@@ -1,6 +1,7 @@
 package org.matveyvs.service;
 
 import org.matveyvs.dao.UserDao;
+import org.matveyvs.dao.filter.UserDaoFilter;
 import org.matveyvs.dto.CreateUserDto;
 import org.matveyvs.dto.UserDto;
 import org.matveyvs.entity.User;
@@ -29,7 +30,15 @@ public class UserService {
     }
 
     public Optional<UserDto> login(String email, String password) {
-        return userDao.findByEmailAndPassword(email, password).map(userMapper::mapFrom);
+        var userDaoFilter = new UserDaoFilter(null,email,password);
+        return userDao.findByFilter(userDaoFilter).map(userMapper::mapFrom);
+    }
+
+    public boolean checkIfExist(String username, String email) {
+        var usernameFilter = new UserDaoFilter(username,null,null);
+        var emailFilter = new UserDaoFilter(null, email,null);
+        return userDao.findByFilter(usernameFilter).isPresent() ||
+               userDao.findByFilter(emailFilter).isPresent();
     }
 
     public static UserService getInstance() {
