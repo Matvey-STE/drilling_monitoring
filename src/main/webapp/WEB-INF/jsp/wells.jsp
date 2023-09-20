@@ -5,6 +5,7 @@
     <title>Wells Information</title>
 </head>
 <body>
+<%@include file="header.jsp"%>
 <div>
     <h2>Wells Data Information</h2>
     <c:forEach var="well" items="${requestScope.welldata}">

@@ -1,6 +1,6 @@
 package org.matveyvs.dao;
 
-import org.matveyvs.entity.Status;
+import org.matveyvs.entity.Role;
 import org.matveyvs.entity.User;
 import org.matveyvs.exception.DaoException;
 import org.matveyvs.utils.ConnectionManager;
@@ -17,22 +17,26 @@ public class UserDao implements Dao<Long, User> {
     private static final UserDao INSTANCE = new UserDao();
     private static final String SAVE_SQL = """
             INSERT INTO users
-            (username, email, password, status, created_at, last_login_at, first_name, last_name) 
-            VALUES (?,?,?,?,?,?,?,?)
+            (username, email, password, role, created_at, first_name, last_name) 
+            VALUES (?,?,?,?,?,?,?)
             """;
     private static final String FIND_ALL_SQL = """
             SELECT 
-            user_id, username, email, password, status, created_at, last_login_at, first_name, last_name
+            user_id, username, email, password, role, created_at, first_name, last_name
             FROM users;
             """;
+    private static final String FIND_BY_EMAIL_AND_PASSWORD= """
+            SELECT user_id, username, email, password, role, created_at, first_name, last_name
+            FROM  users WHERE email = ? AND password = ?;
+            """;
     private static final String FIND_BY_ID_SQL = """
-            SELECT user_id, username, email, password, status, created_at, last_login_at, first_name, last_name
+            SELECT user_id, username, email, password, role, created_at, first_name, last_name
             FROM  users WHERE user_id = ?;
             """;
     private static final String UPDATE_FLIGHT_BY_ID = """
             UPDATE users
             SET   username = ?, email = ?, password = ?,
-            status = ?, created_at = ?, last_login_at = ?,
+            role = ?, created_at = ?,
             first_name = ?, last_name = ?
             WHERE user_id = ?;
             """;
@@ -53,8 +57,8 @@ public class UserDao implements Dao<Long, User> {
                 id = keys.getLong("user_id");
             }
             return new User(id, user.userName(), user.email(),
-                    user.password(), user.status(), user.createdAt(),
-                    user.lastLoginAt(), user.firstName(), user.lastName());
+                    user.password(), user.role(), user.createdAt(),
+                    user.firstName(), user.lastName());
         } catch (SQLException e) {
             throw new DaoException(e);
         }
@@ -90,13 +94,28 @@ public class UserDao implements Dao<Long, User> {
             throw new DaoException(e);
         }
     }
+    public Optional<User> findByEmailAndPassword(String email, String password) {
+        try (var connection = ConnectionManager.open();
+             var statement = connection.prepareStatement(FIND_BY_EMAIL_AND_PASSWORD)) {
+            statement.setString(1, email);
+            statement.setString(2, password);
+            var result = statement.executeQuery();
+            User user = null;
+            if (result.next()) {
+                user = buildUser(result);
+            }
+            return Optional.ofNullable(user);
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+    }
 
     @Override
     public boolean update(User user) {
         try (var connection = ConnectionManager.open();
              var statement = connection.prepareStatement(UPDATE_FLIGHT_BY_ID)) {
             setUserIntoStatement(user, statement);
-            statement.setDouble(9, user.id());
+            statement.setDouble(8, user.id());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new DaoException(e);
@@ -120,9 +139,8 @@ public class UserDao implements Dao<Long, User> {
                 result.getString("username"),
                 result.getString("email"),
                 result.getString("password"),
-                Status.valueOf(result.getString("status")),
+                Role.valueOf(result.getString("role")),
                 result.getTimestamp("created_at"),
-                result.getTimestamp("last_login_at"),
                 result.getString("first_name"),
                 result.getString("last_name"));
     }
@@ -131,11 +149,10 @@ public class UserDao implements Dao<Long, User> {
         statement.setString(1, user.userName());
         statement.setString(2, user.email());
         statement.setString(3, user.password());
-        statement.setString(4, String.valueOf(user.status()));
+        statement.setString(4, String.valueOf(user.role()));
         statement.setTimestamp(5, user.createdAt());
-        statement.setTimestamp(6, user.lastLoginAt());
-        statement.setString(7, user.firstName());
-        statement.setString(8, user.lastName());
+        statement.setString(6, user.firstName());
+        statement.setString(7, user.lastName());
     }
 
     private UserDao() {

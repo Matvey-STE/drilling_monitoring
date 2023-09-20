@@ -49,8 +49,8 @@ class UserDaoTest {
     }
 
     private static User getObject() {
-        return new User("Test", "Test", "Test", Status.USER, Timestamp.valueOf(LocalDateTime.now()),
-                Timestamp.valueOf(LocalDateTime.now()), "Test", "Test");
+        return new User("Test", "Test", "Test", Role.USER, Timestamp.valueOf(LocalDateTime.now()),
+                 "Test", "Test");
     }
 
     @Test
@@ -100,15 +100,15 @@ class UserDaoTest {
     void update() {
         User saved = userDao.save(getObject());
 
-        User updatedObject = new User(saved.id(), "updatedTest", "updatedTest", "updatedTestupdatedTest", Status.ADMIN, Timestamp.valueOf(LocalDateTime.now()),
-                Timestamp.valueOf(LocalDateTime.now()), "updatedTest", "updatedTest");
+        User updatedObject = new User(saved.id(), "updatedTest", "updatedTest", "updatedTestupdatedTest", Role.ADMIN, Timestamp.valueOf(LocalDateTime.now()),
+                 "updatedTest", "updatedTest");
         boolean updated = userDao.update(updatedObject);
 
         assertTrue(updated);
         Optional<User> find = userDao.findById(updatedObject.id());
         assertTrue(find.isPresent());
         assertEquals(updatedObject.id(), find.get().id());
-        assertEquals(updatedObject.status(), find.get().status());
+        assertEquals(updatedObject.role(), find.get().role());
         testKey = updatedObject.id();
     }
 

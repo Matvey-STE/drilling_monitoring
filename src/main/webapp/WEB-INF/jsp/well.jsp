@@ -6,6 +6,8 @@
     <title>Well</title>
 </head>
 <body>
+<%@include file="header.jsp"%>
+
 <c:if test="${not empty requestScope.surface}">
     <h2>Surface Information:</h2>
     <c:forEach var="surface" items="${requestScope.surface}">
