@@ -8,7 +8,7 @@ import java.util.List;
 public class GammaService {
 
     private static final GammaService INSTANCE = new GammaService();
-    GammaDao gammaDao = GammaDao.getInstance();
+    private final GammaDao gammaDao = GammaDao.getInstance();
 
     public List<GammaDto> findAllByDownholeId(Long downholeId) {
         return gammaDao.findAllByDownholeId(downholeId).stream()

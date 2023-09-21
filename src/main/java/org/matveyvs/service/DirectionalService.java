@@ -7,7 +7,7 @@ import java.util.List;
 
 public class DirectionalService {
     private static final DirectionalService INSTANCE = new DirectionalService();
-    DirectionalDao directionalDao = DirectionalDao.getInstance();
+    private final DirectionalDao directionalDao = DirectionalDao.getInstance();
 
     public List<DirectionalDto> findAllByDownholeId(Long downholeId) {
         return directionalDao.findAllByDownholeId(downholeId).stream()
