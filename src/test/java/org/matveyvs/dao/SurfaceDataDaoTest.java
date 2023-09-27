@@ -23,8 +23,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 class SurfaceDataDaoTest {
     private SessionFactory sessionFactory;
-    private SurfaceDataDao surfaceDataDao = SurfaceDataDao.getInstance();
-    private WellDataDao wellDataDao = WellDataDao.getInstance();
+    private final SurfaceDataDao surfaceDataDao = SurfaceDataDao.getInstance();
+    private final WellDataDao wellDataDao = WellDataDao.getInstance();
     private SurfaceData saved;
     private static WellData wellData;
     private Integer surfaceDbSize;

@@ -22,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 class DownholeDataDaoTest {
     private SessionFactory sessionFactory;
-    private DownholeDataDao downholeDataDao = DownholeDataDao.getInstance();
-    private WellDataDao wellDataDao = WellDataDao.getInstance();
+    private final DownholeDataDao downholeDataDao = DownholeDataDao.getInstance();
+    private final WellDataDao wellDataDao = WellDataDao.getInstance();
     private DownholeData saved;
     private static WellData wellData;
     private Integer downholeDbSize;
@@ -53,7 +53,7 @@ class DownholeDataDaoTest {
     }
 
     @AfterEach
-    void tearDown() throws SQLException {
+    void tearDown() {
         try {
             downholeDataDao.delete(saved.getId());
             wellDataDao.delete(wellData.getId());

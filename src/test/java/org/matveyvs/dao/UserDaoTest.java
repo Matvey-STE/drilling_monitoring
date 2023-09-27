@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 class UserDaoTest {
     private SessionFactory sessionFactory;
-    private UserDao userDao = UserDao.getInstance();
+    private final UserDao userDao = UserDao.getInstance();
     private User saved;
     private Integer userDbSize;
 

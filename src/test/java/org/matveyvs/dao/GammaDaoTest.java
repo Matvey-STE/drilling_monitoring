@@ -66,7 +66,7 @@ class GammaDaoTest {
     }
 
     @AfterEach
-    void tearDown() throws SQLException {
+    void tearDown() {
         try {
             gammaDao.delete(saved.getId());
             downholeDataDao.delete(downholeData.getId());

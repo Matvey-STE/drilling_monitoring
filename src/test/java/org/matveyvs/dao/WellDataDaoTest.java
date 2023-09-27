@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 class WellDataDaoTest {
     private SessionFactory sessionFactory;
-    private WellDataDao wellDataDao = WellDataDao.getInstance();
+    private final WellDataDao wellDataDao = WellDataDao.getInstance();
     private WellData saved;
     private Integer welldataDbSize;
 

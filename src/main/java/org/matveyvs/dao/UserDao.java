@@ -5,7 +5,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.matveyvs.dao.filter.UserDaoFilter;
-import org.matveyvs.entity.Directional;
 import org.matveyvs.entity.User;
 import org.matveyvs.exception.DaoException;
 import org.matveyvs.utils.HibernateUtil;
@@ -103,11 +102,6 @@ public class UserDao implements Dao<Integer, User> {
     public Optional<User> findByFilter(UserDaoFilter userDaoFilter) {
         try (SessionFactory sessionFactory = HibernateUtil.buildSessionFactory();
              Session session = sessionFactory.openSession()) {
-/*
-            directionals = session
-                    .createQuery("select d from Directional d where downholeData.id = :id", Directional.class)
-                    .setParameter("id", downholeId)
-                    .list();*/
 
             String hql = "select u FROM User u WHERE 1 = 1";
 
