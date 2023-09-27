@@ -1,4 +1,4 @@
-package org.matveyvs.servlet;
+package org.matveyvs.servlet.html;
 
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;

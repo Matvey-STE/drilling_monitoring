@@ -12,7 +12,6 @@ import org.matveyvs.service.UserService;
 import org.matveyvs.utils.JspHelper;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 import static org.matveyvs.utils.UrlPath.LOGIN;
 
@@ -44,8 +43,7 @@ public class LoginServlet extends HttpServlet {
     private void onLoginSuccess(UserDto userDto, HttpServletRequest req, HttpServletResponse resp) {
         log.info("User " +
                  userDto +
-                 " was sussesfully login " +
-                 LocalDateTime.now());
+                 " was successfully login.");
         req.getSession().setAttribute("user", userDto);
         resp.sendRedirect("/wells");
     }
