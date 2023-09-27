@@ -141,6 +141,16 @@ class GammaDaoTest {
     }
 
     @Test
+    void findAllByDownholeId() {
+        Gamma test = getObject();
+        saved = gammaDao.save(test);
+        Integer downholeDataId = downholeData.getId();
+        List<Gamma> list = gammaDao.findAllByDownholeId(downholeDataId);
+        assertNotNull(list);
+        assertTrue(list.size() > 0);
+    }
+
+    @Test
     void findById() {
         Gamma test = getObject();
         saved = gammaDao.save(test);

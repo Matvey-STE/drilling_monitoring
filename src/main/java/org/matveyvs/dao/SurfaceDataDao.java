@@ -46,7 +46,7 @@ public class SurfaceDataDao implements Dao<Integer, SurfaceData> {
         return surfaceDataList;
     }
 
-    public List<SurfaceData> findAllByDownholeId(Integer welldataId) {
+    public List<SurfaceData> findAllByWelldataId(Integer welldataId) {
         List<SurfaceData> surfaceDataList;
         try (var sessionFactory = HibernateUtil.buildSessionFactory();
              var session = sessionFactory.openSession()) {

@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.matveyvs.entity.DownholeData;
 import org.matveyvs.entity.WellData;
 
-import java.sql.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -107,6 +106,16 @@ class DownholeDataDaoTest {
         DownholeData test = getObject();
         saved = downholeDataDao.save(test);
         List<DownholeData> list = downholeDataDao.findAll();
+        assertNotNull(list);
+        assertTrue(list.size() > 0);
+    }
+
+    @Test
+    void findAllByWellId() {
+        DownholeData test = getObject();
+        saved = downholeDataDao.save(test);
+        Integer wellDataId = wellData.getId();
+        List<DownholeData> list = downholeDataDao.findAllByWellId(wellDataId);
         assertNotNull(list);
         assertTrue(list.size() > 0);
     }

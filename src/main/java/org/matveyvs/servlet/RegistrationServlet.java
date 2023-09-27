@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.matveyvs.dto.CreateUserDto;
 import org.matveyvs.entity.Role;
 import org.matveyvs.exception.ValidationException;
@@ -19,7 +20,7 @@ import java.util.List;
 
 import static org.matveyvs.utils.UrlPath.REGISTRATION;
 
-
+@Slf4j
 @WebServlet(REGISTRATION)
 public class RegistrationServlet extends HttpServlet {
     private final UserService userService = UserService.getInstance();
@@ -32,10 +33,17 @@ public class RegistrationServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        var exist = userService.checkIfExist(req.getParameter("username"), req.getParameter("email"));
+        String existingUsername = req.getParameter("username");
+        String existingEmail = req.getParameter("email");
+        var exist = userService.checkIfExist(existingUsername, existingEmail);
 
         if (exist){
             onLoginFail(req, resp);
+            log.info("The user with the username "  +
+                     existingUsername +
+                     " or email " +
+                     existingEmail +
+                     "are already exited.");
         } else {
             var userDto = new CreateUserDto(
                     req.getParameter("username"),
@@ -48,9 +56,13 @@ public class RegistrationServlet extends HttpServlet {
             );
             try {
                 userService.create(userDto);
+                log.info("New user: " +
+                         userDto +
+                         " was successfully registered.");
                 resp.sendRedirect("/login");
             } catch (ValidationException e) {
                 req.setAttribute("errors", e.getErrors());
+                log.error("Existing errors: " + e.getErrors());
                 doGet(req, resp);
             }
         }

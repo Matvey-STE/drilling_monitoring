@@ -124,6 +124,16 @@ class SurfaceDataDaoTest {
     }
 
     @Test
+    void findAllByWelldataId() {
+        SurfaceData test = getObject();
+        saved = surfaceDataDao.save(test);
+        Integer wellDataId = wellData.getId();
+        List<SurfaceData> list = surfaceDataDao.findAllByWelldataId(wellDataId);
+        assertNotNull(list);
+        assertTrue(list.size() > 0);
+    }
+
+    @Test
     void findById() {
         SurfaceData test = getObject();
         saved = surfaceDataDao.save(test);

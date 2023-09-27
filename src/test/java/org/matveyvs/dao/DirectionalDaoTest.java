@@ -147,6 +147,16 @@ class DirectionalDaoTest {
     }
 
     @Test
+    void findAllByDownholeId() {
+        Directional test = getObject();
+        saved = directionalDao.save(test);
+        Integer downholeDataId = downholeData.getId();
+        List<Directional> list = directionalDao.findAllByDownholeId(downholeDataId);
+        assertNotNull(list);
+        assertTrue(list.size() > 0);
+    }
+
+    @Test
     void findById() {
         Directional test = getObject();
         saved = directionalDao.save(test);

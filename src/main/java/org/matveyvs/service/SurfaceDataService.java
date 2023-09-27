@@ -10,7 +10,7 @@ public class SurfaceDataService {
     private final SurfaceDataDao surfaceDataDao = SurfaceDataDao.getInstance();
 
     public List<SurfaceDataDto> findAllByDownholeId(Integer downholeId) {
-        return surfaceDataDao.findAllByDownholeId(downholeId).stream()
+        return surfaceDataDao.findAllByWelldataId(downholeId).stream()
                 .map(surfaceData -> new SurfaceDataDto(surfaceData.getId(), surfaceData.getMeasuredDate(),
                         surfaceData.getMeasuredDepth(), surfaceData.getHoleDepth(),
                         surfaceData.getTvDepth())).toList();

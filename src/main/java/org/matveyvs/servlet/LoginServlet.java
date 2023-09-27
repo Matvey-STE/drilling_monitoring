@@ -6,15 +6,17 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.matveyvs.dto.UserDto;
 import org.matveyvs.service.UserService;
 import org.matveyvs.utils.JspHelper;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 import static org.matveyvs.utils.UrlPath.LOGIN;
 
-
+@Slf4j
 @WebServlet(LOGIN)
 public class LoginServlet extends HttpServlet {
     private final UserService userService = UserService.getInstance();
@@ -33,11 +35,17 @@ public class LoginServlet extends HttpServlet {
 
     @SneakyThrows
     private void onLoginFail(HttpServletRequest req, HttpServletResponse resp) {
-        resp.sendRedirect("/login?error=true&email=" + req.getParameter("email"));
+        String email = req.getParameter("email");
+        log.info("Fail to login with email: " + email);
+        resp.sendRedirect("/login?error=true&email=" + email);
     }
 
     @SneakyThrows
     private void onLoginSuccess(UserDto userDto, HttpServletRequest req, HttpServletResponse resp) {
+        log.info("User " +
+                 userDto +
+                 " was sussesfully login " +
+                 LocalDateTime.now());
         req.getSession().setAttribute("user", userDto);
         resp.sendRedirect("/wells");
     }
