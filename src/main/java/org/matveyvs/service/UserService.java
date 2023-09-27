@@ -26,7 +26,7 @@ public class UserService {
 
         var user = mapper.mapFrom(createUserDto);
         User userResult = userDao.save(user);
-        return Math.toIntExact(userResult.id());
+        return Math.toIntExact(userResult.getUserId());
     }
 
     public Optional<UserDto> login(String email, String password) {

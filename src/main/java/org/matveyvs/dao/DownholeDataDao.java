@@ -1,149 +1,117 @@
 package org.matveyvs.dao;
 
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.HibernateException;
 import org.matveyvs.entity.DownholeData;
 import org.matveyvs.exception.DaoException;
-import org.matveyvs.utils.ConnectionManager;
+import org.matveyvs.utils.HibernateUtil;
 
-import java.sql.*;
-import java.util.ArrayList;
+import javax.persistence.Query;
 import java.util.List;
 import java.util.Optional;
 
-public class DownholeDataDao implements Dao<Long, DownholeData> {
+@Slf4j
+public class DownholeDataDao implements Dao<Integer, DownholeData> {
     private static final DownholeDataDao INSTANCE = new DownholeDataDao();
-    private static final WellDataDao wellDataDao = WellDataDao.getInstance();
-    private static final String SAVE_SQL = """
-            INSERT INTO downhole_data
-            ( welldata_id) 
-            VALUES (?)
-            """;
-    private static final String FIND_ALL_SQL = """
-            SELECT 
-            id, welldata_id
-            FROM downhole_data;
-            """;
-    private static final String FIND_BY_ID_SQL = """
-            SELECT id, welldata_id
-            FROM  downhole_data WHERE id = ?;
-            """;
-    private static final String UPDATE_FLIGHT_BY_ID = """
-            UPDATE downhole_data
-            SET  welldata_id = ?
-            WHERE id = ?;
-            """;
-    private static final String DELETE_SQL = """
-            DELETE FROM downhole_data
-            WHERE id = ?
-            """;
-    private static final String FIND_ALL_BY_WELL_ID = """
-            SELECT 
-            id, welldata_id
-            FROM downhole_data WHERE welldata_id = ?;
-            """;
 
     @Override
     public DownholeData save(DownholeData downholeData) {
-        try (var connection = ConnectionManager.open();
-             var statement = connection.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
-            setDirectionalIntoStatement(downholeData, statement);
-            statement.executeUpdate();
-            var keys = statement.getGeneratedKeys();
-            Long id = null;
-            if (keys.next()) {
-                id = keys.getLong("id");
-            }
-            return new DownholeData(id, downholeData.wellData());
-        } catch (SQLException e) {
+        try (var sessionFactory = HibernateUtil.buildSessionFactory();
+             var session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            session.save(downholeData);
+            session.getTransaction().commit();
+            log.info("The entity {} was saved in database", downholeData);
+        } catch (HibernateException e) {
+            log.error("An exception was thrown {}", e.getMessage(), e);
             throw new DaoException(e);
         }
+        return downholeData;
     }
 
     @Override
     public List<DownholeData> findAll() {
-        try (var connection = ConnectionManager.open();
-             var statement = connection.prepareStatement(FIND_ALL_SQL)) {
-            List<DownholeData> list = new ArrayList<>();
-            var result = statement.executeQuery();
-            while (result.next()) {
-                list.add(buildDownholeData(result));
-            }
-            return list;
-        } catch (SQLException e) {
+        List<DownholeData> downholeDataList;
+        try (var sessionFactory = HibernateUtil.buildSessionFactory();
+             var session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            downholeDataList = session
+                    .createQuery("select d from DownholeData d", DownholeData.class).list();
+            session.getTransaction().commit();
+            log.info("The entities size of {} was found in database", downholeDataList.size());
+        } catch (HibernateException e) {
+            log.error("An exception was thrown {}", e);
             throw new DaoException(e);
         }
+        return downholeDataList;
     }
 
-    public List<DownholeData> findAllByWellId(Long welldataId) {
-        try (var connection = ConnectionManager.open();
-             var statement = connection.prepareStatement(FIND_ALL_BY_WELL_ID)) {
-            statement.setLong(1, welldataId);
-            List<DownholeData> list = new ArrayList<>();
-            var result = statement.executeQuery();
-            while (result.next()) {
-                list.add(buildDownholeData(result));
-            }
-            return list;
-        } catch (SQLException e) {
+    public List<DownholeData> findAllByWellId(Integer welldataId) {
+        List<DownholeData> downholeDataList;
+        try (var sessionFactory = HibernateUtil.buildSessionFactory();
+             var session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            downholeDataList = session
+                    .createQuery("select d from DownholeData d where wellData.id = :id", DownholeData.class)
+                    .setParameter("id", welldataId)
+                    .list();
+            session.getTransaction().commit();
+            log.info("The entities size of {} was found in database", downholeDataList.size());
+        } catch (HibernateException e) {
+            log.error("An exception was thrown {}", e);
             throw new DaoException(e);
         }
+        return downholeDataList;
     }
 
     @Override
-    public Optional<DownholeData> findById(Long id) {
-        try (var connection = ConnectionManager.open()) {
-            return findById(id, connection);
-        } catch (SQLException e) {
-            throw new DaoException(e);
+    public Optional<DownholeData> findById(Integer id) {
+        DownholeData downholeData = null;
+        try (var sessionFactory = HibernateUtil.buildSessionFactory();
+             var session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            Query query = session
+                    .createQuery("SELECT d FROM DownholeData d WHERE id = :id", DownholeData.class);
+            query.setParameter("id", id);
+            downholeData = (DownholeData) query.getSingleResult();
+            session.getTransaction().commit();
+            log.info("The entity {} was found in database", downholeData);
+        } catch (HibernateException e) {
+            e.printStackTrace();
+            log.error("An exception was thrown {}", e);
         }
-    }
-
-    public Optional<DownholeData> findById(Long id, Connection connection) {
-        try (var statement = connection.prepareStatement(FIND_BY_ID_SQL)) {
-            statement.setLong(1, id);
-            var result = statement.executeQuery();
-            DownholeData downholeData = null;
-            if (result.next()) {
-                downholeData = buildDownholeData(result);
-            }
-            return Optional.ofNullable(downholeData);
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
+        return Optional.ofNullable(downholeData);
     }
 
     @Override
     public boolean update(DownholeData downholeData) {
-        try (var connection = ConnectionManager.open();
-             var statement = connection.prepareStatement(UPDATE_FLIGHT_BY_ID)) {
-            setDirectionalIntoStatement(downholeData, statement);
-            statement.setDouble(2, downholeData.id());
-            return statement.executeUpdate() > 0;
-        } catch (SQLException e) {
+        try (var sessionFactory = HibernateUtil.buildSessionFactory();
+             var session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            session.update(downholeData);
+            session.getTransaction().commit();
+            log.info("The entity {} was updated in database", downholeData);
+            return true;
+        } catch (HibernateException e) {
+            log.error("An exception was thrown {}", e);
             throw new DaoException(e);
         }
     }
 
     @Override
-    public boolean delete(Long id) {
-        try (var connection = ConnectionManager.open();
-             var statement =
-                     connection.prepareStatement(DELETE_SQL)) {
-            statement.setLong(1, id);
-            return statement.executeUpdate() > 0;
-        } catch (SQLException e) {
+    public boolean delete(Integer id) {
+        try (var sessionFactory = HibernateUtil.buildSessionFactory();
+             var session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            DownholeData downholeData = session.get(DownholeData.class, id);
+            session.delete(downholeData);
+            session.getTransaction().commit();
+            log.info("The entity {} was deleted from database", downholeData);
+            return true;
+        } catch (HibernateException e) {
+            log.error("An exception was thrown {}", e);
             throw new DaoException(e);
         }
-    }
-
-    private DownholeData buildDownholeData(ResultSet result) throws SQLException {
-        return new DownholeData(result.getLong("id"),
-                wellDataDao.findById(result.getLong("welldata_id"),
-                                result.getStatement().getConnection())
-                        .orElse(null));
-    }
-
-    private static void setDirectionalIntoStatement(DownholeData downholeData, PreparedStatement statement) throws SQLException {
-        statement.setLong(1, downholeData.wellData().id());
     }
 
     private DownholeDataDao() {

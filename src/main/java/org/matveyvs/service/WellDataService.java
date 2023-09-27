@@ -11,8 +11,8 @@ public class WellDataService {
 
     public List<WellDataDto> findAll() {
         return wellDataDao.findAll().stream().map(wellData ->
-                        new WellDataDto(wellData.id(), wellData.companyName(), wellData.fieldName(),
-                                wellData.wellCluster(), wellData.well()))
+                        new WellDataDto(wellData.getId(), wellData.getCompanyName(), wellData.getFieldName(),
+                                wellData.getWellCluster(), wellData.getWell()))
                 .toList();
     }
 

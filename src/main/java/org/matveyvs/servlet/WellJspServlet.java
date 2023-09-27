@@ -28,22 +28,22 @@ public class WellJspServlet extends HttpServlet {
         String directionalIdParam = req.getParameter("directionalId");
         if (surfaceDataIdParam != null) {
             var surfaceList = surfaceDataService.
-                    findAllByDownholeId(Long.valueOf(surfaceDataIdParam)).stream().toList();
+                    findAllByDownholeId(Integer.valueOf(surfaceDataIdParam)).stream().toList();
             req.setAttribute("surface", surfaceList);
         }
         if (downholeDataIdParam != null) {
             var downloadList = downholeDataService
-                    .findAllByWellId(Long.valueOf(downholeDataIdParam)).stream().toList();
+                    .findAllByWellId(Integer.valueOf(downholeDataIdParam)).stream().toList();
             req.setAttribute("downhole", downloadList);
         }
         if (gammaIdParam != null) {
             var gammaList = gammaService
-                    .findAllByDownholeId(Long.valueOf(gammaIdParam)).stream().toList();
+                    .findAllByDownholeId(Integer.valueOf(gammaIdParam)).stream().toList();
             req.setAttribute("gamma", gammaList);
         }
         if (directionalIdParam != null) {
             var directionalList = directionalService
-                    .findAllByDownholeId(Long.valueOf(directionalIdParam)).stream().toList();
+                    .findAllByDownholeId(Integer.valueOf(directionalIdParam)).stream().toList();
             req.setAttribute("directional", directionalList);
         }
         req.getRequestDispatcher(JspHelper.getPath("well")).forward(req, resp);

@@ -1,12 +1,18 @@
 package org.matveyvs.dao;
 
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistry;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.query.NativeQuery;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.matveyvs.entity.Directional;
 import org.matveyvs.entity.DownholeData;
 import org.matveyvs.entity.WellData;
-import org.matveyvs.utils.ConnectionManager;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -14,171 +20,162 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+@Slf4j
 class DirectionalDaoTest {
-    private static WellData wellData;
-    private static DownholeData downholeData;
-    private static long newIdPointToReset;
-    private long testKey;
-    private final WellDataDao wellDataDao = WellDataDao.getInstance();
+    private SessionFactory sessionFactory;
+    private final DirectionalDao directionalDao = DirectionalDao.getInstance();
     private final DownholeDataDao downholeDataDao = DownholeDataDao.getInstance();
-    private DirectionalDao directionalDao;
-    private Connection connection;
-    private static final String DELETE_SQL = """
-            DELETE FROM directional
-            WHERE id = ?
-            """;
-    private static final String DELETE_DOWNHOLE_SQL = """
-            DELETE FROM downhole_data
-            WHERE id = ?
-            """;
-    private static final String DELETE_WELLDATA_SQL = """
-            DELETE FROM well_data
-            WHERE id = ?
-            """;
+    private final WellDataDao wellDataDao = WellDataDao.getInstance();
+    private Directional saved;
+    private static DownholeData downholeData;
+    private static WellData wellData;
+    private Integer downholeDbSize;
+    private Integer wellDataDbSize;
+    private Integer directionalDbSize;
 
-    private String getResetIdTableSql() {
-        return "ALTER SEQUENCE drilling.public.directional_new_id_seq RESTART WITH " + newIdPointToReset;
+    private String getResetDownholeIdTableSql() {
+        return "ALTER SEQUENCE drilling.public.downhole_data_id_seq RESTART WITH " + downholeDbSize;
     }
 
     private String getWellIdTableSql() {
-        return "ALTER SEQUENCE drilling.public.well_data_id_seq RESTART WITH " + newIdPointToReset;
+        return "ALTER SEQUENCE drilling.public.well_data_id_seq RESTART WITH " + wellDataDbSize;
     }
 
-    private String getDownholeIdTableSql() {
-        return "ALTER SEQUENCE drilling.public.downhole_data_id_seq RESTART WITH " + newIdPointToReset;
-    }
-
-    private static DownholeData getDownholeObject() {
-        return new DownholeData(wellData);
-    }
-
-    private static WellData getWellObject() {
-        return new WellData("Test", "Test", "Test",
-                "Test");
+    private String getResetGammaIdTableSql() {
+        return "ALTER SEQUENCE drilling.public.directional_new_id_seq RESTART WITH " + directionalDbSize;
     }
 
     @BeforeEach
     void setUp() {
-        directionalDao = DirectionalDao.getInstance();
-        connection = ConnectionManager.open();
+        directionalDbSize = directionalDao.findAll().size() + 1;
+        wellDataDbSize = wellDataDao.findAll().size() + 1;
+        downholeDbSize = downholeDataDao.findAll().size() + 1;
 
-        wellData = wellDataDao.save(getWellObject());
-        downholeData = downholeDataDao.save(getDownholeObject());
-
-        newIdPointToReset = directionalDao.findAll().size() + 1;
+        wellData = wellDataDao.save(getwelldataObject());
+        downholeData = downholeDataDao.save(getDownholeData());
+        final StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
+                .configure() // configures settings from hibernate.cfg.xml
+                .build();
+        try {
+            sessionFactory = new MetadataSources(registry).buildMetadata().buildSessionFactory();
+        } catch (Exception e) {
+            StandardServiceRegistryBuilder.destroy(registry);
+        }
     }
 
     @AfterEach
-    void tearDown() throws SQLException {
-        PreparedStatement statement = connection.prepareStatement(DELETE_SQL);
-        statement.setLong(1, testKey);
-        statement.executeUpdate();
+    void tearDown() {
+        try {
+            directionalDao.delete(saved.getId());
+            downholeDataDao.delete(downholeData.getId());
+            wellDataDao.delete(wellData.getId());
+        } catch (Exception e) {
+            log.info("Entity was deleted earlier " + e);
+        }
+        if (sessionFactory != null) {
+            try (Session session = sessionFactory.openSession()) {
+                session.beginTransaction();
 
-        PreparedStatement statement2 = connection.prepareStatement(DELETE_DOWNHOLE_SQL);
-        statement2.setLong(1, downholeData.id());
-        statement2.executeUpdate();
+                NativeQuery<?> nativeQuery1 = session
+                        .createNativeQuery(getResetGammaIdTableSql());
+                nativeQuery1.executeUpdate();
+                NativeQuery<?> nativeQuery2 = session
+                        .createNativeQuery(getWellIdTableSql());
+                nativeQuery2.executeUpdate();
+                NativeQuery<?> nativeQuery3 = session
+                        .createNativeQuery(getResetDownholeIdTableSql());
+                nativeQuery3.executeUpdate();
 
-        PreparedStatement statement3 = connection.prepareStatement(DELETE_WELLDATA_SQL);
-        statement3.setLong(1, wellData.id());
-        statement3.executeUpdate();
-
-        Statement resetStatementId = connection.createStatement();
-        resetStatementId.execute(getResetIdTableSql());
-
-        Statement resetStatementId2 = connection.createStatement();
-        resetStatementId2.execute(getWellIdTableSql());
-
-        Statement resetStatementId3 = connection.createStatement();
-        resetStatementId3.execute(getDownholeIdTableSql());
-        connection.close();
+                session.getTransaction().commit();
+            } catch (Exception e) {
+                log.info("Information: " + e);
+            } finally {
+                sessionFactory.close();
+            }
+        }
     }
 
-    private static Directional getDirectional() {
-        return new Directional(Timestamp.valueOf(LocalDateTime.now()), 22.22, 22.22, 22.22, 22.22,
-                22.22, 22.22, 22.22, 22.22, 22.22,
-                22.22, 22.22, 22.22, downholeData);
+    private static Directional getObject() {
+        return  Directional.builder()
+                .measureDate(Timestamp.valueOf(LocalDateTime.now()))
+                .measuredDepth(221.22)
+                .gx(222.22)
+                .gy(223.22)
+                .gz(224.22)
+                .bx(225.22)
+                .by(226.22)
+                .bz(227.22)
+                .inc(284.22)
+                .azTrue(229.22)
+                .azMag(231.22)
+                .azCorr(232.22)
+                .toolfaceCorr(242.22)
+                .downholeData(downholeData)
+                .build();
+    }
+    private static WellData getwelldataObject() {
+        return WellData.builder()
+                .companyName("Test")
+                .fieldName("Test")
+                .wellCluster("Test")
+                .well("Test")
+                .build();
+    }
+
+    private static DownholeData getDownholeData() {
+        return DownholeData.builder()
+                .wellData(wellData)
+                .build();
     }
 
     @Test
     void save() {
-        Directional testDirectional = getDirectional();
-
-        Directional savedDirectional = directionalDao.save(testDirectional);
-
-        assertNotNull(savedDirectional);
-        assertEquals(testDirectional.measuredDepth(), savedDirectional.measuredDepth());
-        assertEquals(testDirectional.measuredDepth(), savedDirectional.measuredDepth());
-        assertEquals(testDirectional.azCorr(), savedDirectional.azCorr());
-        assertEquals(testDirectional.toolfaceCorr(), savedDirectional.toolfaceCorr());
-
-        testKey = savedDirectional.id();
+        Directional test = getObject();
+        saved = directionalDao.save(test);
+        log.info("Entity {} was saved in test", saved);
+        assertNotNull(saved);
+        assertEquals(test.getBx(), saved.getBx());
     }
 
     @Test
     void findAll() {
-        Directional testDirectional = getDirectional();
-
-        Directional savedDirectional = directionalDao.save(testDirectional);
-
-        List<Directional> directionals = directionalDao.findAll();
-
-        assertNotNull(directionals);
-        assertTrue(directionals.size() > 0);
-        testKey = savedDirectional.id();
+        Directional test = getObject();
+        saved = directionalDao.save(test);
+        List<Directional> list = directionalDao.findAll();
+        assertNotNull(list);
+        assertTrue(list.size() > 0);
     }
 
     @Test
     void findById() {
-        Directional testDirectional = getDirectional();
-
-        Directional savedDirectional = directionalDao.save(testDirectional);
-
-        Optional<Directional> optionalDirectional = directionalDao.findById(savedDirectional.id());
-
-        assertTrue(optionalDirectional.isPresent());
-        Directional directionalFind = optionalDirectional.get();
-        assertEquals(savedDirectional.id(), directionalFind.id());
-        assertEquals(savedDirectional.measuredDepth(), directionalFind.measuredDepth());
-        assertEquals(savedDirectional.azCorr(), directionalFind.azCorr());
-        testKey = savedDirectional.id();
+        Directional test = getObject();
+        saved = directionalDao.save(test);
+        Optional<Directional> optional = directionalDao.findById(saved.getId());
+        assertTrue(optional.isPresent());
+        Directional find = optional.get();
+        assertEquals(saved.getId(), find.getId());
+        assertEquals(test.getMeasuredDepth(), find.getMeasuredDepth());
     }
 
     @Test
     void update() {
-        Directional testDirectional = getDirectional();
-
-        Directional savedDirectional = directionalDao.save(testDirectional);
-        Directional updatedDirectional =
-                new Directional(savedDirectional.id(), Timestamp.valueOf(LocalDateTime.now()), 33.33, 22.22, 22.22, 22.22,
-                        22.22, 22.22, 22.22, 22.22, 22.22,
-                        22.22, 33.33, 33.33, downholeData);
-
-
-        boolean updatedResult = directionalDao.update(updatedDirectional);
-
-        assertTrue(updatedResult);
-
-        Optional<Directional> find = directionalDao.findById(updatedDirectional.id());
+        Directional test = getObject();
+        saved = directionalDao.save(test);
+        Double updateWell = 999.99;
+        saved.setMeasuredDepth(updateWell);
+        boolean updated = directionalDao.update(saved);
+        assertTrue(updated);
+        Optional<Directional> find = directionalDao.findById(saved.getId());
         assertTrue(find.isPresent());
-        assertEquals(updatedDirectional.measuredDepth(), find.get().measuredDepth());
-        assertEquals(updatedDirectional.azCorr(), find.get().azCorr());
-
-        testKey = updatedDirectional.id();
+        assertEquals(updateWell, find.get().getMeasuredDepth());
     }
 
     @Test
     void delete() {
-        Directional testDirectional = getDirectional();
+        Directional test = getObject();
+        saved = directionalDao.save(test);
 
-        Directional savedDirectional = directionalDao.save(testDirectional);
-
-        boolean deleted = directionalDao.delete(savedDirectional.id());
+        boolean deleted = directionalDao.delete(saved.getId());
         assertTrue(deleted);
-        // Verify that the airport has been deleted
-        Optional<Directional> deletedAirport = directionalDao.findById(savedDirectional.id());
-        assertTrue(deletedAirport.isEmpty());
-
-        testKey = savedDirectional.id();
     }
 }

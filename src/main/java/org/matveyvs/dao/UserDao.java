@@ -1,177 +1,148 @@
 package org.matveyvs.dao;
 
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.matveyvs.dao.filter.UserDaoFilter;
-import org.matveyvs.entity.Role;
+import org.matveyvs.entity.Directional;
 import org.matveyvs.entity.User;
 import org.matveyvs.exception.DaoException;
-import org.matveyvs.utils.ConnectionManager;
+import org.matveyvs.utils.HibernateUtil;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
+import javax.persistence.Query;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-public class UserDao implements Dao<Long, User> {
+@Slf4j
+public class UserDao implements Dao<Integer, User> {
     private static final UserDao INSTANCE = new UserDao();
-    private static final String SAVE_SQL = """
-            INSERT INTO users
-            (username, email, password, role, created_at, first_name, last_name) 
-            VALUES (?,?,?,?,?,?,?)
-            """;
-    private static final String FIND_ALL_SQL = """
-            SELECT 
-            user_id, username, email, password, role, created_at, first_name, last_name
-            FROM users
-            """;
-    private static final String FIND_BY_ID_SQL = """
-            SELECT user_id, username, email, password, role, created_at, first_name, last_name
-            FROM  users WHERE user_id = ?;
-            """;
-    private static final String UPDATE_FLIGHT_BY_ID = """
-            UPDATE users
-            SET   username = ?, email = ?, password = ?,
-            role = ?, created_at = ?,
-            first_name = ?, last_name = ?
-            WHERE user_id = ?;
-            """;
-    private static final String DELETE_SQL = """
-            DELETE FROM users
-            WHERE user_id = ?
-            """;
 
     @Override
     public User save(User user) {
-        try (var connection = ConnectionManager.open();
-             var statement = connection.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
-            setUserIntoStatement(user, statement);
-            statement.executeUpdate();
-            var keys = statement.getGeneratedKeys();
-            Long id = null;
-            if (keys.next()) {
-                id = keys.getLong("user_id");
-            }
-            return new User(id, user.userName(), user.email(),
-                    user.password(), user.role(), user.createdAt(),
-                    user.firstName(), user.lastName());
-        } catch (SQLException e) {
+        try (var sessionFactory = HibernateUtil.buildSessionFactory();
+             var session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            session.save(user);
+            session.getTransaction().commit();
+            log.info("The entity {} was saved in database", user);
+        } catch (HibernateException e) {
+            log.error("An exception was thrown {}", e.getMessage(), e);
             throw new DaoException(e);
         }
+        return user;
     }
 
     @Override
     public List<User> findAll() {
-        try (var connection = ConnectionManager.open();
-             var statement = connection.prepareStatement(FIND_ALL_SQL)) {
-            List<User> list = new ArrayList<>();
-            var result = statement.executeQuery();
-            while (result.next()) {
-                list.add(buildUser(result));
-            }
-            return list;
-        } catch (SQLException e) {
+        List<User> users;
+        try (var sessionFactory = HibernateUtil.buildSessionFactory();
+             var session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            users = session
+                    .createQuery("select u from User u", User.class).list();
+            session.getTransaction().commit();
+            log.info("The entities size of {} was found in database", users.size());
+        } catch (HibernateException e) {
+            log.error("An exception was thrown {}", e);
             throw new DaoException(e);
         }
-    }
-    public Optional<User> findByFilter(UserDaoFilter userDaoFilter) {
-        List<Object> parameters = new ArrayList<>();
-        List<String> whereSql = new ArrayList<>();
-        if(userDaoFilter.username() != null){
-            parameters.add(userDaoFilter.username());
-            whereSql.add("username = ?");
-        }
-        if(userDaoFilter.email() != null){
-            parameters.add(userDaoFilter.email());
-            whereSql.add("email = ?");
-        }
-        if(userDaoFilter.password() != null){
-            parameters.add(userDaoFilter.password());
-            whereSql.add("password = ?");
-        }
-        String where = whereSql.stream().collect(Collectors.joining(
-                " AND ",
-                "WHERE ",
-                ""
-        ));
-        String sql = FIND_ALL_SQL+where;
-        try (var connection = ConnectionManager.open();
-             var statement = connection.prepareStatement(sql)) {
-            for (int i = 0; i < parameters.size(); i++) {
-                statement.setObject(i+1, parameters.get(i));
-            }
-            var result = statement.executeQuery();
-            User user = null;
-            if (result.next()) {
-                user = buildUser(result);
-            }
-            return Optional.ofNullable(user);
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
+        return users;
     }
 
     @Override
-    public Optional<User> findById(Long id) {
-        try (var connection = ConnectionManager.open();
-             var statement = connection.prepareStatement(FIND_BY_ID_SQL)) {
-            statement.setLong(1, id);
-            var result = statement.executeQuery();
-            User user = null;
-            if (result.next()) {
-                user = buildUser(result);
-            }
-            return Optional.ofNullable(user);
-        } catch (SQLException e) {
-            throw new DaoException(e);
+    public Optional<User> findById(Integer id) {
+        User user = null;
+        try (var sessionFactory = HibernateUtil.buildSessionFactory();
+             var session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            Query query = session
+                    .createQuery("SELECT u FROM User u WHERE id = :id", User.class);
+            query.setParameter("id", id);
+            user = (User) query.getSingleResult();
+            session.getTransaction().commit();
+            log.info("The entity {} was found in database", user);
+        } catch (HibernateException e) {
+            e.printStackTrace();
+            log.error("An exception was thrown {}", e);
         }
+        return Optional.ofNullable(user);
     }
 
     @Override
     public boolean update(User user) {
-        try (var connection = ConnectionManager.open();
-             var statement = connection.prepareStatement(UPDATE_FLIGHT_BY_ID)) {
-            setUserIntoStatement(user, statement);
-            statement.setDouble(8, user.id());
-            return statement.executeUpdate() > 0;
-        } catch (SQLException e) {
+        try (var sessionFactory = HibernateUtil.buildSessionFactory();
+             var session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            session.update(user);
+            session.getTransaction().commit();
+            log.info("The entity {} was updated in database", user);
+            return true;
+        } catch (HibernateException e) {
+            log.error("An exception was thrown {}", e);
             throw new DaoException(e);
         }
     }
 
     @Override
-    public boolean delete(Long id) {
-        try (var connection = ConnectionManager.open();
-             var statement =
-                     connection.prepareStatement(DELETE_SQL)) {
-            statement.setLong(1, id);
-            return statement.executeUpdate() > 0;
-        } catch (SQLException e) {
+    public boolean delete(Integer id) {
+        try (var sessionFactory = HibernateUtil.buildSessionFactory();
+             var session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            User user = session.get(User.class, id);
+            session.delete(user);
+            session.getTransaction().commit();
+            log.info("The entity {} was deleted from database", user);
+            return true;
+        } catch (HibernateException e) {
+            log.error("An exception was thrown {}", e);
             throw new DaoException(e);
         }
     }
 
-    private User buildUser(ResultSet result) throws SQLException {
-        return new User(result.getLong("user_id"),
-                result.getString("username"),
-                result.getString("email"),
-                result.getString("password"),
-                Role.valueOf(result.getString("role")),
-                result.getTimestamp("created_at"),
-                result.getString("first_name"),
-                result.getString("last_name"));
-    }
+    public Optional<User> findByFilter(UserDaoFilter userDaoFilter) {
+        try (SessionFactory sessionFactory = HibernateUtil.buildSessionFactory();
+             Session session = sessionFactory.openSession()) {
+/*
+            directionals = session
+                    .createQuery("select d from Directional d where downholeData.id = :id", Directional.class)
+                    .setParameter("id", downholeId)
+                    .list();*/
 
-    private static void setUserIntoStatement(User user, PreparedStatement statement) throws SQLException {
-        statement.setString(1, user.userName());
-        statement.setString(2, user.email());
-        statement.setString(3, user.password());
-        statement.setString(4, String.valueOf(user.role()));
-        statement.setTimestamp(5, user.createdAt());
-        statement.setString(6, user.firstName());
-        statement.setString(7, user.lastName());
+            String hql = "select u FROM User u WHERE 1 = 1";
+
+            if (userDaoFilter.username() != null) {
+                hql += " AND u.userName = :username";
+            }
+            if (userDaoFilter.email() != null) {
+                hql += " AND u.email = :email";
+            }
+            if (userDaoFilter.password() != null) {
+                hql += " AND u.password = :password";
+            }
+
+            Query query = session.createQuery(hql, User.class);
+
+            if (userDaoFilter.username() != null) {
+                query.setParameter("username", userDaoFilter.username());
+            }
+            if (userDaoFilter.email() != null) {
+                query.setParameter("email", userDaoFilter.email());
+            }
+            if (userDaoFilter.password() != null) {
+                query.setParameter("password", userDaoFilter.password());
+            }
+
+            List<User> results = query.getResultList();
+
+            if (!results.isEmpty()) {
+                return Optional.of(results.get(0));
+            } else {
+                return Optional.empty();
+            }
+        } catch (Exception e) {
+            throw new DaoException(e);
+        }
     }
 
     private UserDao() {

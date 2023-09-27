@@ -18,10 +18,10 @@
 <c:if test="${not empty requestScope.downhole}">
     <h2>Downhole Information:</h2>
     <c:forEach var="downhole" items="${requestScope.downhole}">
-        <h4>Company name: ${downhole.wellData().companyName()}
-            Field name: ${downhole.wellData().fieldName()}
-            Well cluster: ${downhole.wellData().wellCluster()}
-            Well: ${downhole.wellData().well()}</h4>
+        <h4>Company name: ${downhole.wellData().getCompanyName()}
+            Field name: ${downhole.wellData().getFieldName()}
+            Well cluster: ${downhole.wellData().getWellCluster()}
+            Well: ${downhole.wellData().getWell()}</h4>
         <h5><a href='/well?directionalId=${downhole.id()}'>Directional Info</a></h5>
         <h5><a href='/well?gammaId=${downhole.id()}'>Gamma Info</a></h5>
     </c:forEach>

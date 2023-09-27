@@ -1,10 +1,27 @@
 package org.matveyvs.entity;
 
-import java.sql.Timestamp;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record Gamma(Long id, Timestamp timestamp, Double measuredDepth, Double grcx, DownholeData downholeData) {
-    public Gamma(Timestamp timestamp, Double measuredDepth, Double grcx, DownholeData downholeData) {
-        this(null, timestamp, measuredDepth, grcx, downholeData);
-    }
+import javax.persistence.*;
+import java.sql.Timestamp;
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+public class Gamma{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Integer id;
+    Timestamp measureDate;
+    @Column(name = "mdepth")
+    Double measuredDepth;
+    Double grcx;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "downhole_id")
+    DownholeData downholeData;
 }
 

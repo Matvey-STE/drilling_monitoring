@@ -9,11 +9,11 @@ public class SurfaceDataService {
     private static final SurfaceDataService INSTANCE = new SurfaceDataService();
     private final SurfaceDataDao surfaceDataDao = SurfaceDataDao.getInstance();
 
-    public List<SurfaceDataDto> findAllByDownholeId(Long downholeId) {
+    public List<SurfaceDataDto> findAllByDownholeId(Integer downholeId) {
         return surfaceDataDao.findAllByDownholeId(downholeId).stream()
-                .map(surfaceData -> new SurfaceDataDto(surfaceData.id(), surfaceData.measuredDate(),
-                        surfaceData.measuredDepth(), surfaceData.holeDepth(),
-                        surfaceData.tvDepth())).toList();
+                .map(surfaceData -> new SurfaceDataDto(surfaceData.getId(), surfaceData.getMeasuredDate(),
+                        surfaceData.getMeasuredDepth(), surfaceData.getHoleDepth(),
+                        surfaceData.getTvDepth())).toList();
     }
 
     private SurfaceDataService() {

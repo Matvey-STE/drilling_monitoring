@@ -1,14 +1,35 @@
 package org.matveyvs.entity;
 
-import java.sql.Timestamp;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record SurfaceData(Long id, Timestamp measuredDate, Double measuredDepth, Double holeDepth,
-                          Double tvDepth, Double hookload, Double wob, Double blockPos,
-                          Double standpipePressure, WellData wellData) {
-    public SurfaceData(Timestamp measuredDate, Double measuredDepth, Double holeDepth,
-                       Double tvDepth, Double hookload, Double wob, Double blockPos,
-                       Double standpipePressure, WellData wellData) {
-        this(null, measuredDate, measuredDepth, holeDepth,
-                tvDepth, hookload, wob, blockPos, standpipePressure, wellData);
-    }
+import javax.persistence.*;
+import java.sql.Timestamp;
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+public class SurfaceData {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Integer id;
+    @Column(name = "measure_date")
+    Timestamp measuredDate;
+    @Column(name = "mdepth")
+    Double measuredDepth;
+    Double holeDepth;
+    @Column(name = "tvdepth")
+    Double tvDepth;
+    Double hookload;
+    Double wob;
+    Double blockPos;
+    @Column(name = "standpipe_pr")
+    Double standpipePressure;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "welldata_id")
+    WellData wellData;
+
 }

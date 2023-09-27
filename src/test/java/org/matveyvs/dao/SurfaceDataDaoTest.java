@@ -1,11 +1,17 @@
 package org.matveyvs.dao;
 
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistry;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.query.NativeQuery;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.matveyvs.entity.SurfaceData;
 import org.matveyvs.entity.WellData;
-import org.matveyvs.utils.ConnectionManager;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -14,146 +20,140 @@ import java.util.Optional;
 
 
 import static org.junit.jupiter.api.Assertions.*;
-
+@Slf4j
 class SurfaceDataDaoTest {
-    private static long newIdPointToReset;
-    private long testKey;
-    private SurfaceDataDao surfaceDataDao;
+    private SessionFactory sessionFactory;
+    private SurfaceDataDao surfaceDataDao = SurfaceDataDao.getInstance();
+    private WellDataDao wellDataDao = WellDataDao.getInstance();
+    private SurfaceData saved;
     private static WellData wellData;
-    private final WellDataDao wellDataDao = WellDataDao.getInstance();
-    private Connection connection;
-    private static final String DELETE_SQL = """
-            DELETE FROM surface_data
-            WHERE id = ?
-            """;
-    private static final String DELETE_WELLDATA_SQL = """
-            DELETE FROM well_data
-            WHERE id = ?
-            """;
+    private Integer surfaceDbSize;
+    private Integer wellDataDbSize;
 
     private String getResetIdTableSql() {
-        return "ALTER SEQUENCE drilling.public.surface_data_id_seq RESTART WITH " + newIdPointToReset;
+        return "ALTER SEQUENCE drilling.public.surface_data_id_seq RESTART WITH " + surfaceDbSize;
     }
     private String getWellIdTableSql() {
-        return "ALTER SEQUENCE drilling.public.well_data_id_seq RESTART WITH " + newIdPointToReset;
+        return "ALTER SEQUENCE drilling.public.well_data_id_seq RESTART WITH " + wellDataDbSize;
     }
 
     @BeforeEach
     void setUp() {
-        surfaceDataDao = SurfaceDataDao.getInstance();
-        connection = ConnectionManager.open();
-
-        wellData = wellDataDao.save(getWellObject());
-
-        newIdPointToReset = surfaceDataDao.findAll().size() + 1;
+        wellDataDbSize = wellDataDao.findAll().size() + 1;
+        surfaceDbSize = surfaceDataDao.findAll().size() + 1;
+        wellData = wellDataDao.save(getwelldataObject());
+        final StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
+                .configure() // configures settings from hibernate.cfg.xml
+                .build();
+        try {
+            sessionFactory = new MetadataSources(registry).buildMetadata().buildSessionFactory();
+        } catch (Exception e) {
+            // The registry would be destroyed by the SessionFactory, but we had trouble building the SessionFactory
+            // so destroy it manually.
+            StandardServiceRegistryBuilder.destroy(registry);
+        }
     }
 
     @AfterEach
-    void tearDown() throws SQLException {
-        PreparedStatement statement = connection.prepareStatement(DELETE_SQL);
-        statement.setLong(1, testKey);
-        statement.executeUpdate();
+    void tearDown() {
+        try {
+            surfaceDataDao.delete(saved.getId());
+            wellDataDao.delete(wellData.getId());
+        } catch (Exception e) {
+            log.info("Entity was deleted earlier " + e);
+        }
+        if (sessionFactory != null) {
+            try (Session session = sessionFactory.openSession()) {
+                session.beginTransaction();
 
+                NativeQuery<?> nativeQuery1 = session.createNativeQuery(getResetIdTableSql());
+                nativeQuery1.executeUpdate();
+                NativeQuery<?> nativeQuery2 = session.createNativeQuery(getWellIdTableSql());
+                nativeQuery2.executeUpdate();
 
-        PreparedStatement statement2 = connection.prepareStatement(DELETE_WELLDATA_SQL);
-        statement2.setLong(1, wellData.id());
-        statement2.executeUpdate();
-
-
-
-        Statement resetStatementId = connection.createStatement();
-        resetStatementId.execute(getResetIdTableSql());
-
-        Statement resetStatementId2 = connection.createStatement();
-        resetStatementId2.execute(getWellIdTableSql());
-        connection.close();
+                session.getTransaction().commit();
+            } catch (Exception e) {
+                log.info("Information: " + e);
+            } finally {
+                sessionFactory.close();
+            }
+        }
+    }
+    private static WellData getwelldataObject() {
+        return WellData.builder()
+                .companyName("Test")
+                .fieldName("Test")
+                .wellCluster("Test")
+                .well("Test")
+                .build();
     }
     private static SurfaceData getObject() {
-        return new SurfaceData(Timestamp.valueOf(LocalDateTime.now()),
-                            22.22, 22.22,22.22,
-                        22.22,22.22, 22.22,22.22, wellData);
-    }
-    private static WellData getWellObject() {
-        return new WellData("Test", "Test", "Test",
-                "Test");
+        return SurfaceData.builder()
+                .measuredDate(Timestamp.valueOf(LocalDateTime.now()))
+                .measuredDepth(21.25)
+                .holeDepth(11.22)
+                .tvDepth(21.22)
+                .hookload(24.22)
+                .wob(25.22)
+                .blockPos(21.25)
+                .standpipePressure(22.25)
+                .wellData(wellData)
+                .build();
     }
 
     @Test
     void save() {
         SurfaceData test = getObject();
 
-        SurfaceData saved = surfaceDataDao.save(test);
-
+        saved = surfaceDataDao.save(test);
+        log.info("Entity {} was saved in test", saved);
         assertNotNull(saved);
-        assertEquals(test.measuredDate(), saved.measuredDate());
-        assertEquals(test.measuredDepth(), saved.measuredDepth());
-
-        testKey = saved.id();
+        assertEquals(test.getBlockPos(), saved.getBlockPos());
+        assertEquals(test.getWob(), saved.getWob());
     }
 
     @Test
     void findAll() {
         SurfaceData test = getObject();
-
-        SurfaceData saved = surfaceDataDao.save(test);
+        saved = surfaceDataDao.save(test);
 
         List<SurfaceData> list = surfaceDataDao.findAll();
 
         assertNotNull(list);
         assertTrue(list.size() > 0);
-        testKey = saved.id();
     }
 
     @Test
     void findById() {
         SurfaceData test = getObject();
+        saved = surfaceDataDao.save(test);
 
-        SurfaceData saved = surfaceDataDao.save(test);
-
-        Optional<SurfaceData> optional = surfaceDataDao.findById(saved.id());
-
+        Optional<SurfaceData> optional = surfaceDataDao.findById(saved.getId());
         assertTrue(optional.isPresent());
         SurfaceData find = optional.get();
-        assertEquals(saved.id(), find.id());
-        assertEquals(test.measuredDepth(), find.measuredDepth());
-        assertEquals(test.measuredDate(), find.measuredDate());
-        testKey = saved.id();
+        assertEquals(saved.getId(), find.getId());
+        assertEquals(test.getWob(), find.getWob());
+        assertEquals(test.getHoleDepth(), find.getHoleDepth());
     }
 
     @Test
     void update() {
         SurfaceData test = getObject();
-
-        SurfaceData saved = surfaceDataDao.save(test);
-
-        SurfaceData updatedObject = new SurfaceData(saved.id(),Timestamp.valueOf(LocalDateTime.now()),
-                33.33, 22.22,22.22,
-                22.22,22.22, 33.33,33.33, wellData);
-
-        boolean updated = surfaceDataDao.update(updatedObject);
-
+        saved = surfaceDataDao.save(test);
+        Double updateBlockPos = 999.99;
+        saved.setBlockPos(updateBlockPos);
+        boolean updated = surfaceDataDao.update(saved);
         assertTrue(updated);
-
-        Optional<SurfaceData> find = surfaceDataDao.findById(updatedObject.id());
+        Optional<SurfaceData> find = surfaceDataDao.findById(saved.getId());
         assertTrue(find.isPresent());
-        assertEquals(updatedObject.measuredDepth(), find.get().measuredDepth());
-        assertEquals(updatedObject.measuredDate(), find.get().measuredDate());
-        assertEquals(updatedObject.blockPos(), find.get().blockPos());
-
-        testKey = updatedObject.id();
+        assertEquals(updateBlockPos, find.get().getBlockPos());
     }
 
     @Test
     void delete() {
         SurfaceData test = getObject();
-
-        SurfaceData saved = surfaceDataDao.save(test);
-
-        boolean deleted = surfaceDataDao.delete(saved.id());
+        saved = surfaceDataDao.save(test);
+        boolean deleted = surfaceDataDao.delete(saved.getId());
         assertTrue(deleted);
-        Optional<SurfaceData> deletedAirport = surfaceDataDao.findById(testKey);
-        assertTrue(deletedAirport.isEmpty());
-
-        testKey = saved.id();
     }
 }

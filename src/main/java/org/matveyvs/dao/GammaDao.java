@@ -1,160 +1,117 @@
 package org.matveyvs.dao;
 
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.HibernateException;
 import org.matveyvs.entity.Gamma;
 import org.matveyvs.exception.DaoException;
-import org.matveyvs.utils.ConnectionManager;
+import org.matveyvs.utils.HibernateUtil;
 
-import java.sql.*;
-import java.util.ArrayList;
+import javax.persistence.Query;
 import java.util.List;
 import java.util.Optional;
 
-public class GammaDao implements Dao<Long, Gamma> {
+@Slf4j
+public class GammaDao implements Dao<Integer, Gamma> {
     private static final GammaDao INSTANCE = new GammaDao();
-    private static final DownholeDataDao downholeDataDao = DownholeDataDao.getInstance();
-
-    private static final String SAVE_SQL = """
-            INSERT INTO gamma
-            (measure_date, mdepth, grcx, downhole_id) 
-            VALUES (?,?,?,?)
-            """;
-    private static final String FIND_ALL_SQL = """
-             SELECT 
-            id, measure_date, mdepth, grcx, downhole_id
-             FROM gamma;
-             """;
-    private static final String FIND_ALL_BY_DOWNHOLE_ID = """
-             SELECT 
-            id, measure_date, mdepth, grcx, downhole_id
-             FROM gamma WHERE downhole_id = ?;
-             """;
-    private static final String FIND_BY_ID_SQL = """
-            SELECT id, measure_date, mdepth, grcx, downhole_id
-            FROM  gamma WHERE id = ?;
-            """;
-    private static final String UPDATE_FLIGHT_BY_ID = """
-            UPDATE gamma
-            SET  measure_date = ?,
-                 mdepth = ?,
-                 grcx = ?,
-                 downhole_id = ?
-            WHERE id = ?;
-            """;
-    private static final String DELETE_SQL = """
-            DELETE FROM gamma
-            WHERE id = ?
-            """;
-
 
     @Override
     public Gamma save(Gamma gamma) {
-        try (var connection = ConnectionManager.open();
-             var statement = connection.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
-            setGammaIntoStatement(gamma, statement);
-            statement.executeUpdate();
-            var keys = statement.getGeneratedKeys();
-            Long id = null;
-            if (keys.next()) {
-                id = keys.getLong("id");
-            }
-            return new Gamma(id, gamma.timestamp(), gamma.measuredDepth(), gamma.grcx(), gamma.downholeData());
-        } catch (SQLException e) {
+        try (var sessionFactory = HibernateUtil.buildSessionFactory();
+             var session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            session.save(gamma);
+            session.getTransaction().commit();
+            log.info("The entity {} was saved in database", gamma);
+        } catch (HibernateException e) {
+            log.error("An exception was thrown {}", e.getMessage(), e);
             throw new DaoException(e);
         }
+        return gamma;
     }
 
     @Override
     public List<Gamma> findAll() {
-        try (var connection = ConnectionManager.open();
-             var statement = connection.prepareStatement(FIND_ALL_SQL)) {
-            List<Gamma> list = new ArrayList<>();
-            var result = statement.executeQuery();
-            while (result.next()) {
-                list.add(buildGamma(result));
-            }
-            return list;
-        } catch (SQLException e) {
+        List<Gamma> gammas;
+        try (var sessionFactory = HibernateUtil.buildSessionFactory();
+             var session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            gammas = session
+                    .createQuery("select g from Gamma g", Gamma.class).list();
+            session.getTransaction().commit();
+            log.info("The entities size of {} was found in database", gammas.size());
+        } catch (HibernateException e) {
+            log.error("An exception was thrown {}", e);
             throw new DaoException(e);
         }
+        return gammas;
     }
 
-    public List<Gamma> findAllByDownholeId(Long downholeId) {
-        try (var connection = ConnectionManager.open();
-             var statement = connection.prepareStatement(FIND_ALL_BY_DOWNHOLE_ID)) {
-            statement.setLong(1, downholeId);
-            List<Gamma> list = new ArrayList<>();
-            var result = statement.executeQuery();
-            while (result.next()) {
-                list.add(buildGamma(result));
-            }
-            return list;
-        } catch (SQLException e) {
+    public List<Gamma> findAllByDownholeId(Integer downholeId) {
+        List<Gamma> gammas;
+        try (var sessionFactory = HibernateUtil.buildSessionFactory();
+             var session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            gammas = session
+                    .createQuery("select g from Gamma g where downholeData.id = :id", Gamma.class)
+                    .setParameter("id", downholeId)
+                    .list();
+            session.getTransaction().commit();
+            log.info("The entities size of {} was found in database", gammas.size());
+        } catch (HibernateException e) {
+            log.error("An exception was thrown {}", e);
             throw new DaoException(e);
         }
+        return gammas;
     }
 
     @Override
-    public Optional<Gamma> findById(Long id) {
-        try (var connection = ConnectionManager.open()) {
-            return findById(id, connection);
-        } catch (SQLException e) {
-            throw new DaoException(e);
+    public Optional<Gamma> findById(Integer id) {
+        Gamma gamma = null;
+        try (var sessionFactory = HibernateUtil.buildSessionFactory();
+             var session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            Query query = session
+                    .createQuery("SELECT g FROM Gamma g WHERE id = :id", Gamma.class);
+            query.setParameter("id", id);
+            gamma = (Gamma) query.getSingleResult();
+            session.getTransaction().commit();
+            log.info("The entity {} was found in database", gamma);
+        } catch (HibernateException e) {
+            e.printStackTrace();
+            log.error("An exception was thrown {}", e);
         }
-    }
-
-    public Optional<Gamma> findById(Long id, Connection connection) {
-        try (var statement = connection.prepareStatement(FIND_BY_ID_SQL)) {
-            statement.setLong(1, id);
-            var result = statement.executeQuery();
-            Gamma gamma = null;
-            if (result.next()) {
-                gamma = buildGamma(result);
-            }
-            return Optional.ofNullable(gamma);
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
+        return Optional.ofNullable(gamma);
     }
 
     @Override
     public boolean update(Gamma gamma) {
-        try (var connection = ConnectionManager.open();
-             var statement = connection.prepareStatement(UPDATE_FLIGHT_BY_ID)) {
-            setGammaIntoStatement(gamma, statement);
-            statement.setDouble(5, gamma.id());
-            return statement.executeUpdate() > 0;
-        } catch (SQLException e) {
+        try (var sessionFactory = HibernateUtil.buildSessionFactory();
+             var session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            session.update(gamma);
+            session.getTransaction().commit();
+            log.info("The entity {} was updated in database", gamma);
+            return true;
+        } catch (HibernateException e) {
+            log.error("An exception was thrown {}", e);
             throw new DaoException(e);
         }
     }
 
     @Override
-    public boolean delete(Long id) {
-        try (var connection = ConnectionManager.open();
-             var statement =
-                     connection.prepareStatement(DELETE_SQL)) {
-            statement.setLong(1, id);
-            return statement.executeUpdate() > 0;
-        } catch (SQLException e) {
+    public boolean delete(Integer id) {
+        try (var sessionFactory = HibernateUtil.buildSessionFactory();
+             var session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            Gamma gamma = session.get(Gamma.class, id);
+            session.delete(gamma);
+            session.getTransaction().commit();
+            log.info("The entity {} was deleted from database", gamma);
+            return true;
+        } catch (HibernateException e) {
+            log.error("An exception was thrown {}", e);
             throw new DaoException(e);
         }
-    }
-
-    private Gamma buildGamma(ResultSet result) throws SQLException {
-        return new Gamma(result.getLong("id"),
-                result.getTimestamp("measure_date"),
-                result.getDouble("mdepth"),
-                result.getDouble("grcx"),
-                downholeDataDao.findById(result.getLong("downhole_id"),
-                                result.getStatement().getConnection())
-                        .orElse(null));
-    }
-
-    private static void setGammaIntoStatement(Gamma gamma, PreparedStatement statement) throws SQLException {
-        statement.setTimestamp(1, gamma.timestamp());
-        statement.setDouble(2, gamma.measuredDepth());
-        statement.setDouble(3, gamma.grcx());
-        statement.setLong(4, gamma.downholeData().id());
     }
 
     private GammaDao() {

@@ -42,7 +42,7 @@ public class WellServlet extends HttpServlet {
 
                 writer.write("<div>");
                 writer.write("<ul>");
-                surfaceDataService.findAllByDownholeId(Long.valueOf(surfaceDataIdParam)).forEach(surfaceData ->
+                surfaceDataService.findAllByDownholeId(Integer.valueOf(surfaceDataIdParam)).forEach(surfaceData ->
                         writer.write("""
                             <li>
                             <h4>Date: %s </h4>
@@ -55,7 +55,7 @@ public class WellServlet extends HttpServlet {
             if (downholeDataIdParam != null) {
                 writer.write("<h1>Downhole Data Information:</h1>");
                 writer.write("<ul>");
-                downholeDataService.findAllByWellId(Long.valueOf(downholeDataIdParam)).forEach(wellDataDto ->
+                downholeDataService.findAllByWellId(Integer.valueOf(downholeDataIdParam)).forEach(wellDataDto ->
                         writer.write("""
                             <li>
                             <h4>Company name: %s</h4>
@@ -63,8 +63,8 @@ public class WellServlet extends HttpServlet {
                             <h4>Well cluster: %s  Well: %s</h4>               
                             <h3><a href='/well?directionalId=%d'>Directional Info</a></h3>
                             <h3><a href='/well?gammaId=%d'>Gamma Info</a></h3>
-                            </li>""".formatted(wellDataDto.wellData().companyName(), wellDataDto.wellData().fieldName(),
-                                wellDataDto.wellData().wellCluster(), wellDataDto.wellData().well(), wellDataDto.id(),
+                            </li>""".formatted(wellDataDto.wellData().getWell(), wellDataDto.wellData().getFieldName(),
+                                wellDataDto.wellData().getWellCluster(), wellDataDto.wellData().getWell(), wellDataDto.id(),
                                 wellDataDto.id())));
                 writer.write("</ul>");
 
@@ -74,7 +74,7 @@ public class WellServlet extends HttpServlet {
                 writer.write("<h1>Gamma Data Information:</h1>");
                 writer.write("<div>");
                 writer.write("<ul>");
-                gammaService.findAllByDownholeId(Long.valueOf(gammaIdParam)).forEach(gammaDto ->
+                gammaService.findAllByDownholeId(Integer.valueOf(gammaIdParam)).forEach(gammaDto ->
                         writer.write("""
                                 <li>
                                 <h4>%s) Date: %s </h4>
@@ -86,10 +86,10 @@ public class WellServlet extends HttpServlet {
             }
             if (directionalIdParam != null) {
                 writer.write("<h1>Directional Data Information:</h1>");
-                System.out.println(directionalService.findAllByDownholeId(Long.valueOf(directionalIdParam)));
+                System.out.println(directionalService.findAllByDownholeId(Integer.valueOf(downholeDataIdParam)));
                 writer.write("<div>");
                 writer.write("<ul>");
-                directionalService.findAllByDownholeId(Long.valueOf(directionalIdParam)).forEach(dirDto ->
+                directionalService.findAllByDownholeId(Integer.valueOf(directionalIdParam)).forEach(dirDto ->
                         writer.write("""
                             <li>
                             <h4>%s) Date: %s </h4>

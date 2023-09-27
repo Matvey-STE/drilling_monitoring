@@ -7,14 +7,14 @@ public class UserMapper implements Mapper<UserDto, User>{
     private static final UserMapper INSTANCE = new UserMapper();
     @Override
     public UserDto mapFrom(User user) {
-        return new UserDto(Math.toIntExact(user.id()),
-                user.userName(),
-                user.email(),
-                user.password(),
-                user.role(),
-                user.createdAt(),
-                user.firstName(),
-                user.lastName());
+        return new UserDto(Math.toIntExact(user.getUserId()),
+                user.getUserName(),
+                user.getEmail(),
+                user.getPassword(),
+                user.getRole(),
+                user.getCreatedAt(),
+                user.getFirstName(),
+                user.getLastName());
     }
 
     public static UserMapper getInstance() {

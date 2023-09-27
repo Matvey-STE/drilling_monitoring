@@ -34,7 +34,12 @@ public class RandomWellDataBaseCreator {
     private Gamma createRandomGamma(Double measureDepth, DownholeData downholeData) {
         double grcx = creteRandomDouble(30, 400, 2);
 
-        return new Gamma(Timestamp.valueOf(LocalDateTime.now()), measureDepth, grcx, downholeData);
+        return Gamma.builder()
+                .measureDate(Timestamp.valueOf(LocalDateTime.now()))
+                .measuredDepth(measureDepth)
+                .grcx(grcx)
+                .downholeData(downholeData)
+                .build();
     }
 
     private Directional createRandomDirectional(Double measureDepth, DownholeData downholeData) {
@@ -50,10 +55,22 @@ public class RandomWellDataBaseCreator {
         double azCorr = creteRandomDouble(0, 359, 2);
         double toolfaceCorr = creteRandomDouble(0, 359, 2);
 
-        return new Directional
-                (Timestamp.valueOf(LocalDateTime.now()), measureDepth,
-                        gx, gy, gz, bx, by, bz, inc, azTrue, azMag,
-                        azCorr, toolfaceCorr, downholeData);
+        return Directional.builder()
+                .measureDate(Timestamp.valueOf(LocalDateTime.now()))
+                .measuredDepth(measureDepth)
+                .gx(gx)
+                .gy(gy)
+                .gz(gz)
+                .bx(bx)
+                .by(by)
+                .bz(bz)
+                .inc(inc)
+                .azTrue(azTrue)
+                .azMag(azMag)
+                .azCorr(azCorr)
+                .toolfaceCorr(toolfaceCorr)
+                .downholeData(downholeData)
+                .build();
     }
 
     private SurfaceData createRandomSurfaceData(Double measureDepth, WellData wellData) {
@@ -64,17 +81,33 @@ public class RandomWellDataBaseCreator {
         Double blockPos = creteRandomDouble(0, 50, 2);
         Double standpipePr = creteRandomDouble(0, 400, 2);
 
-        return new SurfaceData(Timestamp.valueOf(LocalDateTime.now()),
-                measureDepth, holeDepth, tvDepth, hookload, wob, blockPos, standpipePr, wellData);
+        return SurfaceData.builder()
+                .measuredDate(Timestamp.valueOf(LocalDateTime.now()))
+                .measuredDepth(measureDepth)
+                .holeDepth(holeDepth)
+                .tvDepth(tvDepth)
+                .hookload(hookload)
+                .wob(wob)
+                .blockPos(blockPos)
+                .standpipePressure(standpipePr)
+                .wellData(wellData)
+                .build();
     }
 
     private DownholeData createRandomDownholeData(WellData wellData) {
-        return new DownholeData(wellData);
+        return DownholeData.builder()
+                .wellData(wellData)
+                .build();
     }
 
     private WellData createRandomWellData(String companyName, String fieldName,
                                           String wellCluster, String well) {
-        return new WellData(companyName, fieldName, wellCluster, well);
+        return WellData.builder()
+                .companyName(companyName)
+                .fieldName(fieldName)
+                .wellCluster(wellCluster)
+                .well(well)
+                .build();
     }
 
 

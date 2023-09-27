@@ -9,11 +9,11 @@ public class DirectionalService {
     private static final DirectionalService INSTANCE = new DirectionalService();
     private final DirectionalDao directionalDao = DirectionalDao.getInstance();
 
-    public List<DirectionalDto> findAllByDownholeId(Long downholeId) {
+    public List<DirectionalDto> findAllByDownholeId(Integer downholeId) {
         return directionalDao.findAllByDownholeId(downholeId).stream()
-                .map(directional -> new DirectionalDto(directional.id(), directional.measureDate(),
-                        directional.measuredDepth(), directional.inc(), directional.azCorr(),
-                        directional.azTrue(), directional.downholeData()))
+                .map(directional -> new DirectionalDto(directional.getId(), directional.getMeasureDate(),
+                        directional.getMeasuredDepth(), directional.getInc(), directional.getAzCorr(),
+                        directional.getAzTrue(), directional.getDownholeData()))
                 .toList();
     }
 

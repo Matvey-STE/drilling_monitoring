@@ -4,6 +4,6 @@ import org.matveyvs.entity.DownholeData;
 
 import java.sql.Timestamp;
 
-public record GammaDto(Long id, Timestamp measureDate, Double measureDepth,
+public record GammaDto(Integer id, Timestamp measureDate, Double measureDepth,
                        Double grcx, DownholeData downholeData) {
 }
