@@ -11,6 +11,8 @@ import org.matveyvs.mapper.UserMapper;
 import org.matveyvs.validator.CreateUserValidator;
 
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class UserService {
     private static final UserService INSTANCE = new UserService();
@@ -30,8 +32,17 @@ public class UserService {
     }
 
     public Optional<UserDto> login(String email, String password) {
-        var userDaoFilter = new UserDaoFilter(null,email,password);
+        String pattern = "^[A-Za-z0-9+_.-]+@(.+)$";
+        Pattern emailPattern = Pattern.compile(pattern);
+        Matcher matcher = emailPattern.matcher(email);
+        UserDaoFilter userDaoFilter;
+        if (matcher.matches()){
+            userDaoFilter = new UserDaoFilter(null,email,password);
+        } else {
+            userDaoFilter = new UserDaoFilter(email, null, password);
+        }
         return userDao.findByFilter(userDaoFilter).map(userMapper::mapFrom);
+
     }
 
     public boolean checkIfExist(String username, String email) {

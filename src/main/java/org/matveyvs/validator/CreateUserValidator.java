@@ -11,7 +11,7 @@ public class CreateUserValidator implements Validator<CreateUserDto>{
         if (Role.find(userDto.role()).isEmpty()){
             validationResult.add(Error.of("invalid.role", "Role is invalid"));
         }
-        if (userDto.username().isEmpty()){
+        if (userDto.username().isEmpty() || usernameValidation(userDto.username())){
             validationResult.add(Error.of("invalid.username", "Username is invalid"));
         }
         if (userDto.email().isEmpty()){
@@ -29,7 +29,9 @@ public class CreateUserValidator implements Validator<CreateUserDto>{
         return validationResult;
     }
 
-
+    private boolean usernameValidation(String username){
+        return username.contains("@");
+    }
     public static CreateUserValidator getInstance() {
         return INSTANCE;
     }
