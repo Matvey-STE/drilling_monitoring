@@ -8,11 +8,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.matveyvs.service.WellDataService;
 import org.matveyvs.utils.JspHelper;
+import org.matveyvs.utils.LinkCreatorUtil;
 
 import java.io.IOException;
 
+import static org.matveyvs.utils.UrlPath.WELLS;
+
 @Slf4j
-@WebServlet("/wells")
+@WebServlet(WELLS)
 public class WellDataJspServet extends HttpServlet {
     private final WellDataService wellDataService = WellDataService.getInstance();
 
@@ -22,7 +25,8 @@ public class WellDataJspServet extends HttpServlet {
         Object user = req.getSession().getAttribute("user");
         log.info("User " +
                  user +
-                 " visited /wells");
+                 " visited " +
+                 LinkCreatorUtil.createLink(req.getRequestURI(), req.getQueryString()));
         req.setAttribute("welldata", wellData);
         req.getRequestDispatcher(JspHelper.getPath("wells")).forward(req, resp);
     }

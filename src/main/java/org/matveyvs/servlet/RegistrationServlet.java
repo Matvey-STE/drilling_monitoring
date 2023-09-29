@@ -37,13 +37,13 @@ public class RegistrationServlet extends HttpServlet {
         String existingEmail = req.getParameter("email");
         var exist = userService.checkIfExist(existingUsername, existingEmail);
 
-        if (exist){
+        if (exist) {
             onLoginFail(req, resp);
-            log.info("The user with the username "  +
+            log.info("The user with the username " +
                      existingUsername +
                      " or email " +
                      existingEmail +
-                     "are already exited.");
+                     " are already exited.");
         } else {
             var userDto = new CreateUserDto(
                     req.getParameter("username"),
@@ -67,9 +67,10 @@ public class RegistrationServlet extends HttpServlet {
             }
         }
     }
+
     @SneakyThrows
     private void onLoginFail(HttpServletRequest req, HttpServletResponse resp) {
         resp.sendRedirect("/registration?error=true&username=" + req.getParameter("username")
-        + "&email=" + req.getParameter("email"));
+                          + "&email=" + req.getParameter("email"));
     }
 }
