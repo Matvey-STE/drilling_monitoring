@@ -17,12 +17,19 @@ public class RandomWellDataBaseCreator {
     WellDataDao wellDataDao = WellDataDao.getInstance();
     private static final Random random = new Random();
 
-    public void createRandomDataForTests(){
-        createRandomWellInformation("Company test",
-                "FieldName test", "WellCluster test",
-                "Well test" , 0.01, 3.00);
+    public void createRandomDataForTests() {
+        createRandomWellInformation("Sibur",
+                "Samotlorskoe", "2022",
+                "10485", 0.01, 1.00);
+        createRandomWellInformation("Rosneft",
+                "Tallinskow", "3456",
+                "18451", 0.01, 1.00);
+        createRandomWellInformation("Gazprom",
+                "Yamalskoe", "1500",
+                "28324", 0.01, 1.00);
         userDao.save(getUserObject());
     }
+
     private static User getUserObject() {
         return User.builder()
                 .userName("Random Test")

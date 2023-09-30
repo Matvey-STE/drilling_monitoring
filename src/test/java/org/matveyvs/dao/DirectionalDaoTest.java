@@ -1,6 +1,9 @@
 package org.matveyvs.dao;
 
+import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,6 +11,7 @@ import org.matveyvs.dao.TestUtil.TestDatabaseUtil;
 import org.matveyvs.entity.Directional;
 import org.matveyvs.entity.DownholeData;
 import org.matveyvs.entity.WellData;
+import org.matveyvs.utils.HibernateUtil;
 
 
 import java.sql.*;
@@ -16,8 +20,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 @Slf4j
 class DirectionalDaoTest {
+    private final SessionFactory sessionFactory = HibernateUtil.buildSessionFactory();
     private final DirectionalDao directionalDao = DirectionalDao.getInstance();
     private final DownholeDataDao downholeDataDao = DownholeDataDao.getInstance();
     private final WellDataDao wellDataDao = WellDataDao.getInstance();
@@ -49,7 +55,7 @@ class DirectionalDaoTest {
     }
 
     private static Directional getObject() {
-        return  Directional.builder()
+        return Directional.builder()
                 .measureDate(Timestamp.valueOf(LocalDateTime.now()))
                 .measuredDepth(221.22)
                 .gx(222.22)
@@ -66,6 +72,7 @@ class DirectionalDaoTest {
                 .downholeData(downholeData)
                 .build();
     }
+
     private static WellData getwelldataObject() {
         return WellData.builder()
                 .companyName("Test")
@@ -141,4 +148,44 @@ class DirectionalDaoTest {
         boolean deleted = directionalDao.delete(saved.getId());
         assertTrue(deleted);
     }
+
+    @Test
+    void findAllDirectionalByFieldName() {
+        String fieldName = "";
+        if (directionalDao.findById(1).isPresent()) {
+            fieldName = directionalDao.findById(1).get()
+                    .getDownholeData().getWellData().getFieldName();
+        }
+        @Cleanup Session session = sessionFactory.openSession();
+        List<Directional> fieldNameTest = directionalDao.findAllDirectionalByFieldName(session, fieldName);
+
+        for (Directional directional : fieldNameTest) {
+            assertEquals(directional.getDownholeData().getWellData().getFieldName(), fieldName);
+        }
+    }
+
+    @Test
+    void findAllDirByDepthBetweenAndFieldName() {
+        String fieldName = "";
+        Double depth = null;
+        if (directionalDao.findById(1).isPresent()) {
+            fieldName = directionalDao.findById(1).get()
+                    .getDownholeData().getWellData().getFieldName();
+
+            depth = directionalDao.findById(1).get().getMeasuredDepth();
+        }
+        Double startDepth = depth - 0.01;
+        Double endDepth = depth + 0.01;
+        @Cleanup Session session = sessionFactory.openSession();
+        List<Directional> fieldNameTest = directionalDao
+                .findAllDirByDepthBetweenAndFieldName(session, fieldName, startDepth, endDepth);
+
+        for (Directional directional : fieldNameTest) {
+            assertEquals(directional.getDownholeData().getWellData().getFieldName(), fieldName);
+            assertTrue(directional.getMeasuredDepth() > startDepth);
+            assertTrue(directional.getMeasuredDepth() < endDepth);
+            System.out.println(directional);
+        }
+    }
+
 }

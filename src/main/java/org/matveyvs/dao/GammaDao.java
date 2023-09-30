@@ -1,7 +1,9 @@
 package org.matveyvs.dao;
 
+import com.querydsl.jpa.impl.JPAQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.HibernateException;
+import org.hibernate.Session;
 import org.matveyvs.entity.Gamma;
 import org.matveyvs.exception.DaoException;
 import org.matveyvs.utils.HibernateUtil;
@@ -9,6 +11,10 @@ import org.matveyvs.utils.HibernateUtil;
 import javax.persistence.Query;
 import java.util.List;
 import java.util.Optional;
+
+import static org.matveyvs.entity.QDownholeData.downholeData;
+import static org.matveyvs.entity.QGamma.*;
+import static org.matveyvs.entity.QWellData.wellData;
 
 @Slf4j
 public class GammaDao implements Dao<Integer, Gamma> {
@@ -112,6 +118,28 @@ public class GammaDao implements Dao<Integer, Gamma> {
             log.error("An exception was thrown {}", e);
             throw new DaoException(e);
         }
+    }
+
+    public List<Gamma> findAllGammaByFieldName(Session session, String fieldName) {
+        return new JPAQuery<Gamma>(session)
+                .select(gamma)
+                .from(gamma)
+                .join(gamma.downholeData, downholeData)
+                .join(downholeData.wellData, wellData)
+                .where(wellData.fieldName.eq(fieldName))
+                .fetch();
+    }
+
+    public List<Gamma> findAllGamByDepthBetweenAndFieldName
+            (Session session, String fieldName, Double startDepth, Double endDepth) {
+        return new JPAQuery<Gamma>(session)
+                .select(gamma)
+                .from(gamma)
+                .join(gamma.downholeData, downholeData)
+                .join(downholeData.wellData, wellData)
+                .where(gamma.measuredDepth.between(startDepth, endDepth)
+                        .and(wellData.fieldName.eq(fieldName)))
+                .fetch();
     }
 
     private GammaDao() {
