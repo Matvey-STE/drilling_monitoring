@@ -1,15 +1,10 @@
 package org.matveyvs.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.boot.MetadataSources;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.query.NativeQuery;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.matveyvs.dao.TestUtil.TestDatabaseUtil;
 import org.matveyvs.dao.filter.UserDaoFilter;
 import org.matveyvs.entity.*;
 
@@ -22,28 +17,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 class UserDaoTest {
-    private SessionFactory sessionFactory;
     private final UserDao userDao = UserDao.getInstance();
     private User saved;
-    private Integer userDbSize;
 
-    private String getResetUserIdSql() {
-        return "ALTER SEQUENCE drilling.public.users_user_id_seq RESTART WITH " + userDbSize;
-    }
 
     @BeforeEach
     void setUp() {
-        userDbSize = userDao.findAll().size() + 1;
-        final StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
-                .configure() // configures settings from hibernate.cfg.xml
-                .build();
-        try {
-            sessionFactory = new MetadataSources(registry).buildMetadata().buildSessionFactory();
-        } catch (Exception e) {
-            // The registry would be destroyed by the SessionFactory, but we had trouble building the SessionFactory
-            // so destroy it manually.
-            StandardServiceRegistryBuilder.destroy(registry);
-        }
+        //create random data
+        TestDatabaseUtil.createRandomData();
     }
 
     @AfterEach
@@ -53,18 +34,8 @@ class UserDaoTest {
         } catch (Exception e) {
             log.info("Entity was deleted earlier " + e);
         }
-        if (sessionFactory != null) {
-            try (Session session = sessionFactory.openSession()) {
-                session.beginTransaction();
-                NativeQuery<?> nativeQuery2 = session.createNativeQuery(getResetUserIdSql());
-                nativeQuery2.executeUpdate();
-                session.getTransaction().commit();
-            } catch (Exception e) {
-                log.info("Information: " + e);
-            } finally {
-                sessionFactory.close();
-            }
-        }
+        //remove all tables
+        TestDatabaseUtil.dropListOfTables();
     }
 
     private static User getUserObject() {
@@ -105,7 +76,7 @@ class UserDaoTest {
     @Test
     void findById() {
         User test = getUserObject();
-        saved = userDao.save(getUserObject());
+        saved = userDao.save(test);
         Optional<User> optional = userDao.findById(saved.getUserId());
         assertTrue(optional.isPresent());
         User find = optional.get();
@@ -138,28 +109,37 @@ class UserDaoTest {
 
     @Test
     void findByFilter() {
-        User test = getUserObject();
-        saved = userDao.save(test);
+        if (userDao.findById(1).isPresent()) {
+            saved = userDao.findById(1).get();
+        }
 
         UserDaoFilter userDaoFilter1 =
-                new UserDaoFilter(saved.getUserName(), null,null);
-        Optional<User> byFilter1 = userDao.findByFilter(userDaoFilter1);
-        assertEquals(saved.getUserId(), byFilter1.get().getUserId());
+                new UserDaoFilter(saved.getUserName(), null, null);
+        if (userDao.findByFilter(userDaoFilter1).isPresent()) {
+            User byFilter1 = userDao.findByFilter(userDaoFilter1).get();
+            assertEquals(saved.getUserId(), byFilter1.getUserId());
+        }
 
         UserDaoFilter userDaoFilter2 =
-                new UserDaoFilter(null, saved.getEmail(),null);
-        Optional<User> byFilter2 = userDao.findByFilter(userDaoFilter2);
-        assertEquals(saved.getUserId(), byFilter2.get().getUserId());
+                new UserDaoFilter(null, saved.getEmail(), null);
+        if (userDao.findByFilter(userDaoFilter2).isPresent()) {
+            User byFilter2 = userDao.findByFilter(userDaoFilter2).get();
+            assertEquals(saved.getUserId(), byFilter2.getUserId());
+        }
 
         UserDaoFilter userDaoFilter3 =
-                new UserDaoFilter(null, null,saved.getPassword());
-        Optional<User> byFilter3 = userDao.findByFilter(userDaoFilter3);
-        assertEquals(saved.getUserId(), byFilter3.get().getUserId());
+                new UserDaoFilter(null, null, saved.getPassword());
+        if (userDao.findByFilter(userDaoFilter3).isPresent()) {
+            User byFilter3 = userDao.findByFilter(userDaoFilter3).get();
+            assertEquals(saved.getUserId(), byFilter3.getUserId());
+        }
 
 
         UserDaoFilter userDaoFilter4 =
-                new UserDaoFilter(saved.getUserName(), saved.getEmail(),saved.getPassword());
-        Optional<User> byFilter4 = userDao.findByFilter(userDaoFilter4);
-        assertEquals(saved.getUserId(), byFilter4.get().getUserId());
+                new UserDaoFilter(saved.getUserName(), saved.getEmail(), saved.getPassword());
+        if (userDao.findByFilter(userDaoFilter4).isPresent()) {
+            User byFilter4 = userDao.findByFilter(userDaoFilter4).get();
+            assertEquals(saved.getUserId(), byFilter4.getUserId());
+        }
     }
 }

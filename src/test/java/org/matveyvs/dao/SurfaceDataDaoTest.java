@@ -1,15 +1,10 @@
 package org.matveyvs.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.boot.MetadataSources;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.query.NativeQuery;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.matveyvs.dao.TestUtil.TestDatabaseUtil;
 import org.matveyvs.entity.SurfaceData;
 import org.matveyvs.entity.WellData;
 
@@ -22,36 +17,16 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 class SurfaceDataDaoTest {
-    private SessionFactory sessionFactory;
     private final SurfaceDataDao surfaceDataDao = SurfaceDataDao.getInstance();
     private final WellDataDao wellDataDao = WellDataDao.getInstance();
     private SurfaceData saved;
     private static WellData wellData;
-    private Integer surfaceDbSize;
-    private Integer wellDataDbSize;
-
-    private String getResetIdTableSql() {
-        return "ALTER SEQUENCE drilling.public.surface_data_id_seq RESTART WITH " + surfaceDbSize;
-    }
-    private String getWellIdTableSql() {
-        return "ALTER SEQUENCE drilling.public.well_data_id_seq RESTART WITH " + wellDataDbSize;
-    }
 
     @BeforeEach
     void setUp() {
-        wellDataDbSize = wellDataDao.findAll().size() + 1;
-        surfaceDbSize = surfaceDataDao.findAll().size() + 1;
         wellData = wellDataDao.save(getwelldataObject());
-        final StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
-                .configure() // configures settings from hibernate.cfg.xml
-                .build();
-        try {
-            sessionFactory = new MetadataSources(registry).buildMetadata().buildSessionFactory();
-        } catch (Exception e) {
-            // The registry would be destroyed by the SessionFactory, but we had trouble building the SessionFactory
-            // so destroy it manually.
-            StandardServiceRegistryBuilder.destroy(registry);
-        }
+        //create random data
+        TestDatabaseUtil.createRandomData();
     }
 
     @AfterEach
@@ -62,22 +37,8 @@ class SurfaceDataDaoTest {
         } catch (Exception e) {
             log.info("Entity was deleted earlier " + e);
         }
-        if (sessionFactory != null) {
-            try (Session session = sessionFactory.openSession()) {
-                session.beginTransaction();
-
-                NativeQuery<?> nativeQuery1 = session.createNativeQuery(getResetIdTableSql());
-                nativeQuery1.executeUpdate();
-                NativeQuery<?> nativeQuery2 = session.createNativeQuery(getWellIdTableSql());
-                nativeQuery2.executeUpdate();
-
-                session.getTransaction().commit();
-            } catch (Exception e) {
-                log.info("Information: " + e);
-            } finally {
-                sessionFactory.close();
-            }
-        }
+        //remove all tables
+        TestDatabaseUtil.dropListOfTables();
     }
     private static WellData getwelldataObject() {
         return WellData.builder()

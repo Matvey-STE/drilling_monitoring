@@ -1,15 +1,10 @@
 package org.matveyvs.dao;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.boot.MetadataSources;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.query.NativeQuery;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.matveyvs.dao.TestUtil.TestDatabaseUtil;
 import org.matveyvs.entity.DownholeData;
 import org.matveyvs.entity.Gamma;
 import org.matveyvs.entity.WellData;
@@ -23,46 +18,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 class GammaDaoTest {
-    private SessionFactory sessionFactory;
     private final GammaDao gammaDao = GammaDao.getInstance();
     private final DownholeDataDao downholeDataDao = DownholeDataDao.getInstance();
     private final WellDataDao wellDataDao = WellDataDao.getInstance();
     private Gamma saved;
     private static DownholeData downholeData;
     private static WellData wellData;
-    private Integer downholeDbSize;
-    private Integer wellDataDbSize;
-    private Integer gammaDbSize;
-
-    private String getResetDownholeIdTableSql() {
-        return "ALTER SEQUENCE drilling.public.downhole_data_id_seq RESTART WITH " + downholeDbSize;
-    }
-
-    private String getWellIdTableSql() {
-        return "ALTER SEQUENCE drilling.public.well_data_id_seq RESTART WITH " + wellDataDbSize;
-    }
-
-    private String getResetGammaIdTableSql() {
-        return "ALTER SEQUENCE drilling.public.gamma_new_id_seq RESTART WITH " + gammaDbSize;
-    }
-
 
     @BeforeEach
     void setUp() {
-        gammaDbSize = gammaDao.findAll().size() + 1;
-        wellDataDbSize = wellDataDao.findAll().size() + 1;
-        downholeDbSize = downholeDataDao.findAll().size() + 1;
-
         wellData = wellDataDao.save(getwelldataObject());
         downholeData = downholeDataDao.save(getDownholeData());
-        final StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
-                .configure() // configures settings from hibernate.cfg.xml
-                .build();
-        try {
-            sessionFactory = new MetadataSources(registry).buildMetadata().buildSessionFactory();
-        } catch (Exception e) {
-            StandardServiceRegistryBuilder.destroy(registry);
-        }
+        //create random data
+        TestDatabaseUtil.createRandomData();
     }
 
     @AfterEach
@@ -74,27 +42,8 @@ class GammaDaoTest {
         } catch (Exception e) {
             log.info("Entity was deleted earlier " + e);
         }
-        if (sessionFactory != null) {
-            try (Session session = sessionFactory.openSession()) {
-                session.beginTransaction();
-
-                NativeQuery<?> nativeQuery1 = session
-                        .createNativeQuery(getResetGammaIdTableSql());
-                nativeQuery1.executeUpdate();
-                NativeQuery<?> nativeQuery2 = session
-                        .createNativeQuery(getWellIdTableSql());
-                nativeQuery2.executeUpdate();
-                NativeQuery<?> nativeQuery3 = session
-                        .createNativeQuery(getResetDownholeIdTableSql());
-                nativeQuery3.executeUpdate();
-
-                session.getTransaction().commit();
-            } catch (Exception e) {
-                log.info("Information: " + e);
-            } finally {
-                sessionFactory.close();
-            }
-        }
+        //remove all tables
+        TestDatabaseUtil.dropListOfTables();
     }
 
     private static Gamma getObject() {
@@ -120,7 +69,6 @@ class GammaDaoTest {
                 .wellData(wellData)
                 .build();
     }
-
 
     @Test
     void save() {

@@ -16,6 +16,7 @@ public class Gamma{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
+    @Column (name = "measure_date")
     Timestamp measureDate;
     @Column(name = "mdepth")
     Double measuredDepth;

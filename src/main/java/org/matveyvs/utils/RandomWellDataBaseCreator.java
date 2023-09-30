@@ -9,12 +9,31 @@ import java.util.Random;
 
 public class RandomWellDataBaseCreator {
     private static final RandomWellDataBaseCreator INSTANCE = new RandomWellDataBaseCreator();
-
+    UserDao userDao = UserDao.getInstance();
     GammaDao gammaDao = GammaDao.getInstance();
     DirectionalDao directionalDao = DirectionalDao.getInstance();
     SurfaceDataDao surfaceDataDao = SurfaceDataDao.getInstance();
     DownholeDataDao downholeDataDao = DownholeDataDao.getInstance();
     WellDataDao wellDataDao = WellDataDao.getInstance();
+    private static final Random random = new Random();
+
+    public void createRandomDataForTests(){
+        createRandomWellInformation("Company test",
+                "FieldName test", "WellCluster test",
+                "Well test" , 0.01, 3.00);
+        userDao.save(getUserObject());
+    }
+    private static User getUserObject() {
+        return User.builder()
+                .userName("Random Test")
+                .email("Random Test")
+                .password("Test")
+                .role(Role.USER)
+                .createdAt(Timestamp.valueOf(LocalDateTime.now()))
+                .firstName("Test")
+                .lastName("Test")
+                .build();
+    }
 
     public void createRandomWellInformation(String companyName, String fieldName,
                                             String wellCluster, String well, Double startDepth, Double finishDepth) {
@@ -112,7 +131,6 @@ public class RandomWellDataBaseCreator {
 
 
     private static double creteRandomDouble(int origin, int bound, int round) {
-        Random random = new Random();
         double randomValue = random.nextDouble(origin, bound);
         return roundDouble(randomValue, round);
     }

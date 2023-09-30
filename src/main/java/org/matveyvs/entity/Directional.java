@@ -16,6 +16,7 @@ public class Directional{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @Column(name = "measure_date")
     private Timestamp measureDate;
     @Column(name = "mdepth")
     private Double measuredDepth;
@@ -26,9 +27,13 @@ public class Directional{
     private Double by;
     private Double bz;
     private Double inc;
+    @Column(name = "az_true")
     private Double azTrue;
+    @Column(name = "az_mag")
     private Double azMag;
+    @Column(name = "az_corr")
     private Double azCorr;
+    @Column(name = "toolface_corr")
     private Double toolfaceCorr;
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "downhole_id")

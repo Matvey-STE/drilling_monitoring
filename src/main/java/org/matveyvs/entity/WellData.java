@@ -17,8 +17,11 @@ public class WellData {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
+    @Column(name = "company_name")
     String companyName;
+    @Column(name = "field_name")
     String fieldName;
+    @Column(name = "well_cluster")
     String wellCluster;
     String well;
 }

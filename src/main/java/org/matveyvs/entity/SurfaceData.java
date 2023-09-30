@@ -12,6 +12,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @Builder
 @Entity
+@Table(name = "surface_data")
 public class SurfaceData {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,11 +21,13 @@ public class SurfaceData {
     Timestamp measuredDate;
     @Column(name = "mdepth")
     Double measuredDepth;
+    @Column (name = "hole_depth")
     Double holeDepth;
     @Column(name = "tvdepth")
     Double tvDepth;
     Double hookload;
     Double wob;
+    @Column (name = "bleck_pos")
     Double blockPos;
     @Column(name = "standpipe_pr")
     Double standpipePressure;

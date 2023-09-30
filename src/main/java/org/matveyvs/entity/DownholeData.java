@@ -12,6 +12,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Builder
 @Entity
+@Table(name = "downhole_data")
 public class DownholeData {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
