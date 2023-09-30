@@ -36,11 +36,15 @@ public class DownholeDataDao implements Dao<Integer, DownholeData> {
              var session = sessionFactory.openSession()) {
             session.beginTransaction();
             downholeDataList = session
-                    .createQuery("select d from DownholeData d", DownholeData.class).list();
+                    .createQuery("""
+                            select d
+                            from DownholeData d
+                            join fetch d.wellData
+                            """, DownholeData.class).list();
             session.getTransaction().commit();
             log.info("The entities size of {} was found in database", downholeDataList.size());
         } catch (HibernateException e) {
-            log.error("An exception was thrown {}", e);
+            log.error("An exception was thrown ", e);
             throw new DaoException(e);
         }
         return downholeDataList;
@@ -52,13 +56,18 @@ public class DownholeDataDao implements Dao<Integer, DownholeData> {
              var session = sessionFactory.openSession()) {
             session.beginTransaction();
             downholeDataList = session
-                    .createQuery("select d from DownholeData d where wellData.id = :id", DownholeData.class)
+                    .createQuery("""
+                            select d
+                            from DownholeData d
+                            join fetch d.wellData w
+                            where w.id = :id
+                            """, DownholeData.class)
                     .setParameter("id", welldataId)
                     .list();
             session.getTransaction().commit();
             log.info("The entities size of {} was found in database", downholeDataList.size());
         } catch (HibernateException e) {
-            log.error("An exception was thrown {}", e);
+            log.error("An exception was thrown ", e);
             throw new DaoException(e);
         }
         return downholeDataList;
@@ -71,14 +80,19 @@ public class DownholeDataDao implements Dao<Integer, DownholeData> {
              var session = sessionFactory.openSession()) {
             session.beginTransaction();
             Query query = session
-                    .createQuery("SELECT d FROM DownholeData d WHERE id = :id", DownholeData.class);
-            query.setParameter("id", id);
+                    .createQuery("""
+                            SELECT d
+                            FROM DownholeData d
+                            join fetch d.wellData
+                            WHERE d.id = :id
+                            """, DownholeData.class)
+                    .setParameter("id", id);
             downholeData = (DownholeData) query.getSingleResult();
             session.getTransaction().commit();
             log.info("The entity {} was found in database", downholeData);
         } catch (HibernateException e) {
             e.printStackTrace();
-            log.error("An exception was thrown {}", e);
+            log.error("An exception was thrown ", e);
         }
         return Optional.ofNullable(downholeData);
     }
@@ -93,7 +107,7 @@ public class DownholeDataDao implements Dao<Integer, DownholeData> {
             log.info("The entity {} was updated in database", downholeData);
             return true;
         } catch (HibernateException e) {
-            log.error("An exception was thrown {}", e);
+            log.error("An exception was thrown ", e);
             throw new DaoException(e);
         }
     }
@@ -109,7 +123,7 @@ public class DownholeDataDao implements Dao<Integer, DownholeData> {
             log.info("The entity {} was deleted from database", downholeData);
             return true;
         } catch (HibernateException e) {
-            log.error("An exception was thrown {}", e);
+            log.error("An exception was thrown ", e);
             throw new DaoException(e);
         }
     }

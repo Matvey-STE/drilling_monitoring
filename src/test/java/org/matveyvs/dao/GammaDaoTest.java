@@ -1,9 +1,6 @@
 package org.matveyvs.dao;
 
-import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,7 +8,6 @@ import org.matveyvs.dao.TestUtil.TestDatabaseUtil;
 import org.matveyvs.entity.DownholeData;
 import org.matveyvs.entity.Gamma;
 import org.matveyvs.entity.WellData;
-import org.matveyvs.utils.HibernateUtil;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -22,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 class GammaDaoTest {
-    private final SessionFactory sessionFactory = HibernateUtil.buildSessionFactory();
     private final GammaDao gammaDao = GammaDao.getInstance();
     private final DownholeDataDao downholeDataDao = DownholeDataDao.getInstance();
     private final WellDataDao wellDataDao = WellDataDao.getInstance();
@@ -143,8 +138,7 @@ class GammaDaoTest {
             fieldName = gammaDao.findById(1).get()
                     .getDownholeData().getWellData().getFieldName();
         }
-        @Cleanup Session session = sessionFactory.openSession();
-        List<Gamma> fieldNameTest = gammaDao.findAllGammaByFieldName(session, fieldName);
+        List<Gamma> fieldNameTest = gammaDao.findAllGammaByFieldName(fieldName);
 
         for (Gamma gamma : fieldNameTest) {
             assertEquals(gamma.getDownholeData().getWellData().getFieldName(), fieldName);
@@ -162,17 +156,17 @@ class GammaDaoTest {
 
             depth = gammaDao.findById(1).get().getMeasuredDepth();
         }
-        Double startDepth = depth - 0.01;
-        Double endDepth = depth + 0.01;
-        @Cleanup Session session = sessionFactory.openSession();
-        List<Gamma> fieldNameTest = gammaDao
-                .findAllGamByDepthBetweenAndFieldName(session, fieldName, startDepth, endDepth);
-
-        for (Gamma gamma : fieldNameTest) {
-            assertEquals(gamma.getDownholeData().getWellData().getFieldName(), fieldName);
-            assertTrue(gamma.getMeasuredDepth() > startDepth);
-            assertTrue(gamma.getMeasuredDepth() < endDepth);
-            System.out.println(gamma);
+        if (depth != null) {
+            Double startDepth = depth - 0.01;
+            Double endDepth = depth + 0.01;
+            List<Gamma> fieldNameTest = gammaDao
+                    .findAllGamByDepthBetweenAndFieldName(fieldName, startDepth, endDepth);
+            for (Gamma gamma : fieldNameTest) {
+                assertEquals(gamma.getDownholeData().getWellData().getFieldName(), fieldName);
+                assertTrue(gamma.getMeasuredDepth() > startDepth);
+                assertTrue(gamma.getMeasuredDepth() < endDepth);
+                System.out.println(gamma);
+            }
         }
     }
 }

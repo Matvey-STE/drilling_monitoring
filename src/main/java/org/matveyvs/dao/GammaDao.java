@@ -1,9 +1,9 @@
 package org.matveyvs.dao;
 
 import com.querydsl.jpa.impl.JPAQuery;
+import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.HibernateException;
-import org.hibernate.Session;
 import org.matveyvs.entity.Gamma;
 import org.matveyvs.exception.DaoException;
 import org.matveyvs.utils.HibernateUtil;
@@ -42,11 +42,16 @@ public class GammaDao implements Dao<Integer, Gamma> {
              var session = sessionFactory.openSession()) {
             session.beginTransaction();
             gammas = session
-                    .createQuery("select g from Gamma g", Gamma.class).list();
+                    .createQuery("""
+                            select g
+                            from Gamma g
+                            join fetch g.downholeData h
+                            join fetch h.wellData
+                            """, Gamma.class).list();
             session.getTransaction().commit();
             log.info("The entities size of {} was found in database", gammas.size());
         } catch (HibernateException e) {
-            log.error("An exception was thrown {}", e);
+            log.error("An exception was thrown ", e);
             throw new DaoException(e);
         }
         return gammas;
@@ -58,13 +63,19 @@ public class GammaDao implements Dao<Integer, Gamma> {
              var session = sessionFactory.openSession()) {
             session.beginTransaction();
             gammas = session
-                    .createQuery("select g from Gamma g where downholeData.id = :id", Gamma.class)
+                    .createQuery("""
+                            select g
+                            from Gamma g
+                            join fetch g.downholeData h
+                            join fetch h.wellData
+                            where h.id = :id
+                            """, Gamma.class)
                     .setParameter("id", downholeId)
                     .list();
             session.getTransaction().commit();
             log.info("The entities size of {} was found in database", gammas.size());
         } catch (HibernateException e) {
-            log.error("An exception was thrown {}", e);
+            log.error("An exception was thrown ", e);
             throw new DaoException(e);
         }
         return gammas;
@@ -75,16 +86,23 @@ public class GammaDao implements Dao<Integer, Gamma> {
         Gamma gamma = null;
         try (var sessionFactory = HibernateUtil.buildSessionFactory();
              var session = sessionFactory.openSession()) {
+            session.enableFetchProfile("withDownloadsGamma");
             session.beginTransaction();
             Query query = session
-                    .createQuery("SELECT g FROM Gamma g WHERE id = :id", Gamma.class);
-            query.setParameter("id", id);
+                    .createQuery("""
+                            SELECT g
+                            FROM Gamma g
+                            join fetch g.downholeData h
+                            join fetch h.wellData
+                            WHERE g.id = :id
+                            """, Gamma.class)
+                    .setParameter("id", id);
             gamma = (Gamma) query.getSingleResult();
             session.getTransaction().commit();
             log.info("The entity {} was found in database", gamma);
         } catch (HibernateException e) {
             e.printStackTrace();
-            log.error("An exception was thrown {}", e);
+            log.error("An exception was thrown ", e);
         }
         return Optional.ofNullable(gamma);
     }
@@ -99,7 +117,7 @@ public class GammaDao implements Dao<Integer, Gamma> {
             log.info("The entity {} was updated in database", gamma);
             return true;
         } catch (HibernateException e) {
-            log.error("An exception was thrown {}", e);
+            log.error("An exception was thrown ", e);
             throw new DaoException(e);
         }
     }
@@ -115,12 +133,15 @@ public class GammaDao implements Dao<Integer, Gamma> {
             log.info("The entity {} was deleted from database", gamma);
             return true;
         } catch (HibernateException e) {
-            log.error("An exception was thrown {}", e);
+            log.error("An exception was thrown ", e);
             throw new DaoException(e);
         }
     }
 
-    public List<Gamma> findAllGammaByFieldName(Session session, String fieldName) {
+    public List<Gamma> findAllGammaByFieldName(String fieldName) {
+        @Cleanup var sessionFactory = HibernateUtil.buildSessionFactory();
+        @Cleanup var session = sessionFactory.openSession();
+        session.enableFetchProfile("withDownloadsGamma");
         return new JPAQuery<Gamma>(session)
                 .select(gamma)
                 .from(gamma)
@@ -131,7 +152,10 @@ public class GammaDao implements Dao<Integer, Gamma> {
     }
 
     public List<Gamma> findAllGamByDepthBetweenAndFieldName
-            (Session session, String fieldName, Double startDepth, Double endDepth) {
+            (String fieldName, Double startDepth, Double endDepth) {
+        @Cleanup var sessionFactory = HibernateUtil.buildSessionFactory();
+        @Cleanup var session = sessionFactory.openSession();
+        session.enableFetchProfile("withDownloadsGamma");
         return new JPAQuery<Gamma>(session)
                 .select(gamma)
                 .from(gamma)

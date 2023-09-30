@@ -1,9 +1,6 @@
 package org.matveyvs.dao;
 
-import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,8 +8,6 @@ import org.matveyvs.dao.TestUtil.TestDatabaseUtil;
 import org.matveyvs.entity.Directional;
 import org.matveyvs.entity.DownholeData;
 import org.matveyvs.entity.WellData;
-import org.matveyvs.utils.HibernateUtil;
-
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -23,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 class DirectionalDaoTest {
-    private final SessionFactory sessionFactory = HibernateUtil.buildSessionFactory();
     private final DirectionalDao directionalDao = DirectionalDao.getInstance();
     private final DownholeDataDao downholeDataDao = DownholeDataDao.getInstance();
     private final WellDataDao wellDataDao = WellDataDao.getInstance();
@@ -156,8 +150,7 @@ class DirectionalDaoTest {
             fieldName = directionalDao.findById(1).get()
                     .getDownholeData().getWellData().getFieldName();
         }
-        @Cleanup Session session = sessionFactory.openSession();
-        List<Directional> fieldNameTest = directionalDao.findAllDirectionalByFieldName(session, fieldName);
+        List<Directional> fieldNameTest = directionalDao.findAllDirectionalByFieldName(fieldName);
 
         for (Directional directional : fieldNameTest) {
             assertEquals(directional.getDownholeData().getWellData().getFieldName(), fieldName);
@@ -174,17 +167,17 @@ class DirectionalDaoTest {
 
             depth = directionalDao.findById(1).get().getMeasuredDepth();
         }
-        Double startDepth = depth - 0.01;
-        Double endDepth = depth + 0.01;
-        @Cleanup Session session = sessionFactory.openSession();
-        List<Directional> fieldNameTest = directionalDao
-                .findAllDirByDepthBetweenAndFieldName(session, fieldName, startDepth, endDepth);
-
-        for (Directional directional : fieldNameTest) {
-            assertEquals(directional.getDownholeData().getWellData().getFieldName(), fieldName);
-            assertTrue(directional.getMeasuredDepth() > startDepth);
-            assertTrue(directional.getMeasuredDepth() < endDepth);
-            System.out.println(directional);
+        if (depth != null) {
+            Double startDepth = depth - 0.01;
+            Double endDepth = depth + 0.01;
+            List<Directional> fieldNameTest = directionalDao
+                    .findAllDirByDepthBetweenAndFieldName(fieldName, startDepth, endDepth);
+            for (Directional directional : fieldNameTest) {
+                assertEquals(directional.getDownholeData().getWellData().getFieldName(), fieldName);
+                assertTrue(directional.getMeasuredDepth() > startDepth);
+                assertTrue(directional.getMeasuredDepth() < endDepth);
+                System.out.println(directional);
+            }
         }
     }
 

@@ -36,11 +36,15 @@ public class SurfaceDataDao implements Dao<Integer, SurfaceData> {
              var session = sessionFactory.openSession()) {
             session.beginTransaction();
             surfaceDataList = session
-                    .createQuery("select s from SurfaceData s", SurfaceData.class).list();
+                    .createQuery("""
+                            select s
+                            from SurfaceData s
+                            join fetch s.wellData
+                            """, SurfaceData.class).list();
             session.getTransaction().commit();
             log.info("The entities size of {} was found in database", surfaceDataList.size());
         } catch (HibernateException e) {
-            log.error("An exception was thrown {}", e);
+            log.error("An exception was thrown ", e);
             throw new DaoException(e);
         }
         return surfaceDataList;
@@ -52,13 +56,18 @@ public class SurfaceDataDao implements Dao<Integer, SurfaceData> {
              var session = sessionFactory.openSession()) {
             session.beginTransaction();
             surfaceDataList = session
-                    .createQuery("select s from SurfaceData s where wellData.id = :id", SurfaceData.class)
+                    .createQuery("""
+                            select s
+                            from SurfaceData s
+                            join fetch s.wellData w
+                            where w.id = :id
+                            """, SurfaceData.class)
                     .setParameter("id", welldataId)
                     .list();
             session.getTransaction().commit();
             log.info("The entities size of {} was found in database", surfaceDataList.size());
         } catch (HibernateException e) {
-            log.error("An exception was thrown {}", e);
+            log.error("An exception was thrown ", e);
             throw new DaoException(e);
         }
         return surfaceDataList;
@@ -71,14 +80,19 @@ public class SurfaceDataDao implements Dao<Integer, SurfaceData> {
              var session = sessionFactory.openSession()) {
             session.beginTransaction();
             Query query = session
-                    .createQuery("SELECT s FROM SurfaceData s WHERE id = :id", SurfaceData.class);
-            query.setParameter("id", id);
+                    .createQuery("""
+                            SELECT s
+                            FROM SurfaceData s
+                            join fetch s.wellData
+                            WHERE s.id = :id
+                            """, SurfaceData.class)
+                    .setParameter("id", id);
             surfaceData = (SurfaceData) query.getSingleResult();
             session.getTransaction().commit();
             log.info("The entity {} was found in database", surfaceData);
         } catch (HibernateException e) {
             e.printStackTrace();
-            log.error("An exception was thrown {}", e);
+            log.error("An exception was thrown ", e);
         }
         return Optional.ofNullable(surfaceData);
     }
@@ -93,7 +107,7 @@ public class SurfaceDataDao implements Dao<Integer, SurfaceData> {
             log.info("The entity {} was updated in database", surfaceData);
             return true;
         } catch (HibernateException e) {
-            log.error("An exception was thrown {}", e);
+            log.error("An exception was thrown ", e);
             throw new DaoException(e);
         }
     }
@@ -109,7 +123,7 @@ public class SurfaceDataDao implements Dao<Integer, SurfaceData> {
             log.info("The entity {} was deleted from database", surfaceData);
             return true;
         } catch (HibernateException e) {
-            log.error("An exception was thrown {}", e);
+            log.error("An exception was thrown ", e);
             throw new DaoException(e);
         }
     }

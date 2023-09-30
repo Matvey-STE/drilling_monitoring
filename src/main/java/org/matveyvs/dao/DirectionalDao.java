@@ -1,9 +1,9 @@
 package org.matveyvs.dao;
 
 import com.querydsl.jpa.impl.JPAQuery;
+import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.HibernateException;
-import org.hibernate.Session;
 import org.matveyvs.entity.Directional;
 import org.matveyvs.exception.DaoException;
 import org.matveyvs.utils.HibernateUtil;
@@ -42,11 +42,16 @@ public class DirectionalDao implements Dao<Integer, Directional> {
              var session = sessionFactory.openSession()) {
             session.beginTransaction();
             directionals = session
-                    .createQuery("select d from Directional d", Directional.class).list();
+                    .createQuery("""
+                            select d
+                            from Directional d
+                            join fetch d.downholeData h
+                            join fetch h.wellData
+                            """, Directional.class).list();
             session.getTransaction().commit();
             log.info("The entities size of {} was found in database", directionals.size());
         } catch (HibernateException e) {
-            log.error("An exception was thrown {}", e);
+            log.error("An exception was thrown ", e);
             throw new DaoException(e);
         }
         return directionals;
@@ -58,13 +63,19 @@ public class DirectionalDao implements Dao<Integer, Directional> {
              var session = sessionFactory.openSession()) {
             session.beginTransaction();
             directionals = session
-                    .createQuery("select d from Directional d where downholeData.id = :id", Directional.class)
+                    .createQuery("""
+                            select d
+                            from Directional d
+                            join fetch d.downholeData h
+                            join fetch h.wellData
+                            where h.id = :id
+                            """, Directional.class)
                     .setParameter("id", downholeId)
                     .list();
             session.getTransaction().commit();
             log.info("The entities size of {} was found in database", directionals.size());
         } catch (HibernateException e) {
-            log.error("An exception was thrown {}", e);
+            log.error("An exception was thrown ", e);
             throw new DaoException(e);
         }
         return directionals;
@@ -77,14 +88,20 @@ public class DirectionalDao implements Dao<Integer, Directional> {
              var session = sessionFactory.openSession()) {
             session.beginTransaction();
             Query query = session
-                    .createQuery("SELECT d FROM Directional d WHERE id = :id", Directional.class);
-            query.setParameter("id", id);
+                    .createQuery("""
+                            SELECT d
+                            FROM Directional d
+                            join fetch d.downholeData h
+                            join fetch h.wellData
+                            WHERE d.id = :id
+                            """, Directional.class)
+                    .setParameter("id", id);
             directional = (Directional) query.getSingleResult();
             session.getTransaction().commit();
             log.info("The entity {} was found in database", directional);
         } catch (HibernateException e) {
             e.printStackTrace();
-            log.error("An exception was thrown {}", e);
+            log.error("An exception was thrown ", e);
         }
         return Optional.ofNullable(directional);
     }
@@ -99,7 +116,7 @@ public class DirectionalDao implements Dao<Integer, Directional> {
             log.info("The entity {} was updated in database", directional);
             return true;
         } catch (HibernateException e) {
-            log.error("An exception was thrown {}", e);
+            log.error("An exception was thrown ", e);
             throw new DaoException(e);
         }
     }
@@ -115,12 +132,15 @@ public class DirectionalDao implements Dao<Integer, Directional> {
             log.info("The entity {} was deleted from database", directional);
             return true;
         } catch (HibernateException e) {
-            log.error("An exception was thrown {}", e);
+            log.error("An exception was thrown ", e);
             throw new DaoException(e);
         }
     }
 
-    public List<Directional> findAllDirectionalByFieldName(Session session, String fieldName) {
+    public List<Directional> findAllDirectionalByFieldName(String fieldName) {
+        @Cleanup var sessionFactory = HibernateUtil.buildSessionFactory();
+        @Cleanup var session = sessionFactory.openSession();
+        session.enableFetchProfile("withDownloadsDirectional");
         return new JPAQuery<Directional>(session)
                 .select(directional)
                 .from(directional)
@@ -131,7 +151,10 @@ public class DirectionalDao implements Dao<Integer, Directional> {
     }
 
     public List<Directional> findAllDirByDepthBetweenAndFieldName
-            (Session session, String fieldName, Double startDepth, Double endDepth) {
+            (String fieldName, Double startDepth, Double endDepth) {
+        @Cleanup var sessionFactory = HibernateUtil.buildSessionFactory();
+        @Cleanup var session = sessionFactory.openSession();
+        session.enableFetchProfile("withDownloadsDirectional");
         return new JPAQuery<Directional>(session)
                 .select(directional)
                 .from(directional)
