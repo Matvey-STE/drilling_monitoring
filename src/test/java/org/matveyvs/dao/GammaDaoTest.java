@@ -27,10 +27,11 @@ class GammaDaoTest {
 
     @BeforeEach
     void setUp() {
-        wellData = wellDataDao.save(getwelldataObject());
-        downholeData = downholeDataDao.save(getDownholeData());
         //create random data
         TestDatabaseUtil.createRandomData();
+
+        wellData = wellDataDao.save(getwelldataObject());
+        downholeData = downholeDataDao.save(getDownholeData());
     }
 
     @AfterEach

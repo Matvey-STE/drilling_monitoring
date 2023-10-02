@@ -24,9 +24,10 @@ class SurfaceDataDaoTest {
 
     @BeforeEach
     void setUp() {
-        wellData = wellDataDao.save(getwelldataObject());
         //create random data
         TestDatabaseUtil.createRandomData();
+
+        wellData = wellDataDao.save(getwelldataObject());
     }
 
     @AfterEach

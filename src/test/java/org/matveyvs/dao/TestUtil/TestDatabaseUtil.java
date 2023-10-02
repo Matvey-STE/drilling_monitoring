@@ -4,14 +4,14 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.matveyvs.exception.DaoException;
-import org.matveyvs.utils.HibernateUtil;
 import org.matveyvs.utils.RandomWellDataBaseCreator;
+import org.hibernate.cfg.Configuration;
 
 @UtilityClass
 @Slf4j
 public class TestDatabaseUtil {
-    private final SessionFactory sessionFactory = HibernateUtil.buildSessionFactory();
     private final RandomWellDataBaseCreator randomCreator = RandomWellDataBaseCreator.getInstance();
     private static final String DROP_TABLES = "DROP TABLE ";
 
@@ -20,6 +20,12 @@ public class TestDatabaseUtil {
     }
 
     public void dropListOfTables() {
+        Configuration configuration = new Configuration();
+        configuration.configure("hibernate.cfg.xml"); // Load Hibernate configuration from XML file
+        StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder()
+                .applySettings(configuration.getProperties());
+        SessionFactory sessionFactory = configuration.buildSessionFactory(builder.build());
+
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
             for (TableNames tableToDelete : TableNames.values()) {

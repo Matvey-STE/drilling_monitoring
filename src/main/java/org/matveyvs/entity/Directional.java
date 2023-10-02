@@ -4,11 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.FetchProfile;
 
+
 import javax.persistence.*;
 import java.sql.Timestamp;
+
 @FetchProfile(name = "withDownloadsDirectional", fetchOverrides = {
         @FetchProfile.FetchOverride(entity = Gamma.class, association = "downholeData", mode = FetchMode.JOIN),
         @FetchProfile.FetchOverride(entity = DownholeData.class, association = "wellData", mode = FetchMode.JOIN),
@@ -18,7 +21,8 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @Builder
 @Entity
-public class Directional{
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class Directional {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -41,7 +45,7 @@ public class Directional{
     private Double azCorr;
     @Column(name = "toolface_corr")
     private Double toolfaceCorr;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "downhole_id")
     private DownholeData downholeData;
 }

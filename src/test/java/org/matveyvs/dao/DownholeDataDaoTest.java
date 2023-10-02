@@ -101,6 +101,7 @@ class DownholeDataDaoTest {
         saved = downholeDataDao.save(test);
         String updateWell = "update";
         wellData.setWell(updateWell);
+        wellDataDao.save(wellData);
         saved.setWellData(wellData);
         boolean updated = downholeDataDao.update(saved);
         assertTrue(updated);

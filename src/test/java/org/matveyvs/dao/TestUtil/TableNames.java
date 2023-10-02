@@ -6,5 +6,9 @@ public enum TableNames {
     DOWNHOLE_DATA,
     SURFACE_DATA,
     WELL_DATA,
-    USERS
+    WELL_DATA_AUD,
+    USERS,
+    USERS_AUD,
+    REVINFO,
+
 }
