@@ -15,6 +15,7 @@ import org.matveyvs.mapper.repo.GammaMapperImpl;
 import org.matveyvs.mapper.repo.WellDataMapperImpl;
 import org.matveyvs.utils.HibernateUtil;
 
+import javax.validation.ConstraintViolationException;
 import java.lang.reflect.Proxy;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -119,7 +120,7 @@ class GammaServiceTest {
     @Test
     void findAll() {
         GammaCreateDto object = getObject();
-        Integer id = gammaService.create(object);
+        gammaService.create(object);
         List<GammaReadDto> all = gammaService.findAll();
         assertFalse(all.isEmpty());
     }
@@ -137,9 +138,23 @@ class GammaServiceTest {
     @Test
     void findAllByDownholeId() {
         GammaCreateDto object = getObject();
-        Integer id = gammaService.create(object);
+        gammaService.create(object);
         List<GammaReadDto> allByWellId = gammaService
                 .findAllByDownholeId(downholeDataReadDto.id());
         assertFalse(allByWellId.isEmpty());
+    }
+    private static GammaCreateDto getConstraintObject() {
+        return new GammaCreateDto(
+                null,
+                2.2,
+                3.3,
+                downholeDataReadDto
+        );
+    }
+    @Test
+    void constraintExpectation(){
+        GammaCreateDto object = getConstraintObject();
+        assertThrows(ConstraintViolationException.class,
+                () -> gammaService.create(object));
     }
 }

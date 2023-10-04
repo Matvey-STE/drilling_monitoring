@@ -9,6 +9,9 @@ import org.matveyvs.entity.User;
 import org.matveyvs.mapper.repo.UserMapperImpl;
 
 
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validation;
+import javax.validation.ValidatorFactory;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -19,14 +22,24 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapperImpl userMapper;
+    private final ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
 
     public Integer create(UserCreateDto userCreateDto) {
-        //todo validation
+        var validator = validatorFactory.getValidator();
+        var  validateResult = validator.validate(userCreateDto);
+        if (!validateResult.isEmpty()){
+            throw new ConstraintViolationException(validateResult);
+        }
         var entity = userMapper.map(userCreateDto);
         return userRepository.save(entity).getId();
     }
 
     public boolean update(UserReadDto userReadDto) {
+        var validator = validatorFactory.getValidator();
+        var  validateResult = validator.validate(userReadDto);
+        if (!validateResult.isEmpty()){
+            throw new ConstraintViolationException(validateResult);
+        }
         var optional = userRepository.findById(userReadDto.id());
         if (optional.isPresent()) {
             User user = userMapper.mapFull(userReadDto);

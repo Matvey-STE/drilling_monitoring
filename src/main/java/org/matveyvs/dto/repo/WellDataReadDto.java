@@ -1,5 +1,14 @@
 package org.matveyvs.dto.repo;
 
-public record WellDataReadDto(Integer id, String companyName,
-                              String fieldName, String wellCluster, String well) {
+import javax.validation.constraints.NotNull;
+
+public record WellDataReadDto(
+        Integer id,
+        @NotNull
+        String companyName,
+        @NotNull
+        String fieldName,
+        String wellCluster,
+        @NotNull
+        String well) {
 }

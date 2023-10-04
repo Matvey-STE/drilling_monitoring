@@ -16,6 +16,7 @@ import org.matveyvs.mapper.repo.SurfaceDataMapperImpl;
 import org.matveyvs.mapper.repo.WellDataMapperImpl;
 import org.matveyvs.utils.HibernateUtil;
 
+import javax.validation.ConstraintViolationException;
 import java.lang.reflect.Proxy;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -73,6 +74,7 @@ class SurfaceDataServiceTest {
                 wellDataReadDto
         );
     }
+
     private static SurfaceDataReadDto getUpdatedObject() {
         return new SurfaceDataReadDto(1,
                 Timestamp.valueOf(LocalDateTime.now()),
@@ -86,6 +88,7 @@ class SurfaceDataServiceTest {
                 wellDataReadDto
         );
     }
+
     @Test
     void create() {
         SurfaceDataCreateDto object = getObject();
@@ -117,7 +120,7 @@ class SurfaceDataServiceTest {
     @Test
     void findAll() {
         SurfaceDataCreateDto object = getObject();
-        Integer id = surfaceDataService.create(object);
+        surfaceDataService.create(object);
         List<SurfaceDataReadDto> all = surfaceDataService.findAll();
         assertFalse(all.isEmpty());
     }
@@ -135,8 +138,29 @@ class SurfaceDataServiceTest {
     @Test
     void findAllByWellId() {
         SurfaceDataCreateDto object = getObject();
-        Integer id = surfaceDataService.create(object);
+        surfaceDataService.create(object);
         List<SurfaceDataReadDto> allByWellId = surfaceDataService.findAllByWellId(wellDataReadDto.id());
         assertFalse(allByWellId.isEmpty());
+    }
+
+    private static SurfaceDataCreateDto getConstraintObject() {
+        return new SurfaceDataCreateDto(
+                null,
+                1.1,
+                2.2,
+                3.3,
+                4.4,
+                5.5,
+                6.6,
+                7.7,
+                wellDataReadDto
+        );
+    }
+
+    @Test
+    void constraintExpectation() {
+        SurfaceDataCreateDto object = getConstraintObject();
+        assertThrows(ConstraintViolationException.class,
+                () -> surfaceDataService.create(object));
     }
 }

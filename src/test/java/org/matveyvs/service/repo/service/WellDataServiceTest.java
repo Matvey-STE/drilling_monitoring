@@ -12,6 +12,7 @@ import org.matveyvs.dto.repo.WellDataReadDto;
 import org.matveyvs.mapper.repo.WellDataMapperImpl;
 import org.matveyvs.utils.HibernateUtil;
 
+import javax.validation.ConstraintViolationException;
 import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Optional;
@@ -110,5 +111,21 @@ class WellDataServiceTest {
         assertTrue(delete);
         Optional<WellDataReadDto> byId = wellDataService.findById(id);
         assertTrue(byId.isEmpty());
+    }
+
+    private static WellDataCreateDto getConstraintObject() {
+        return new WellDataCreateDto(
+                null,
+                "Test",
+                "Test",
+                "Test"
+        );
+    }
+
+    @Test
+    void constraintExpectation() {
+        WellDataCreateDto object = getConstraintObject();
+        assertThrows(ConstraintViolationException.class,
+                () -> wellDataService.create(object));
     }
 }

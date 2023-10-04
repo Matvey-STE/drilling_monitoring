@@ -7,6 +7,9 @@ import org.matveyvs.dto.repo.SurfaceDataReadDto;
 import org.matveyvs.entity.SurfaceData;
 import org.matveyvs.mapper.repo.SurfaceDataMapperImpl;
 
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validation;
+import javax.validation.ValidatorFactory;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,13 +17,24 @@ import java.util.Optional;
 public class SurfaceDataService {
     private final SurfaceDataRepository surfaceDataRepository;
     private final SurfaceDataMapperImpl surfaceDataMapper;
+    private final ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
 
     public Integer create(SurfaceDataCreateDto surfaceDataCreateDto) {
+        var validator = validatorFactory.getValidator();
+        var  validateResult = validator.validate(surfaceDataCreateDto);
+        if (!validateResult.isEmpty()){
+            throw new ConstraintViolationException(validateResult);
+        }
         var entity = surfaceDataMapper.map(surfaceDataCreateDto);
         return surfaceDataRepository.save(entity).getId();
     }
 
     public boolean update(SurfaceDataReadDto surfaceDataReadDto) {
+        var validator = validatorFactory.getValidator();
+        var  validateResult = validator.validate(surfaceDataReadDto);
+        if (!validateResult.isEmpty()){
+            throw new ConstraintViolationException(validateResult);
+        }
         var optional = surfaceDataRepository.findById(surfaceDataReadDto.id());
         if (optional.isPresent()) {
             SurfaceData entity = surfaceDataMapper.mapFull(surfaceDataReadDto);

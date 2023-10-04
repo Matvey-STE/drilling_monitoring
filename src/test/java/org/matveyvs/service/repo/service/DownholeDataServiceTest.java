@@ -13,6 +13,7 @@ import org.matveyvs.mapper.repo.DownholeDataMapperImpl;
 import org.matveyvs.mapper.repo.WellDataMapperImpl;
 import org.matveyvs.utils.HibernateUtil;
 
+import javax.validation.ConstraintViolationException;
 import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Optional;
@@ -119,5 +120,18 @@ class DownholeDataServiceTest {
         downholeDataService.create(object);
         List<DownholeDataReadDto> allByWellId = downholeDataService.findAllByWellId(wellDataReadDto.id());
         assertFalse(allByWellId.isEmpty());
+    }
+    private static DownholeDataCreateDto getConstraintObject() {
+        return new DownholeDataCreateDto(
+                null
+        );
+    }
+
+
+    @Test
+    void constraintExpectation(){
+        DownholeDataCreateDto object = getConstraintObject();
+        assertThrows(ConstraintViolationException.class,
+                () -> downholeDataService.create(object));
     }
 }

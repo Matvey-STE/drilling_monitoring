@@ -6,6 +6,9 @@ import org.matveyvs.dto.repo.*;
 import org.matveyvs.entity.Gamma;
 import org.matveyvs.mapper.repo.GammaMapperImpl;
 
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validation;
+import javax.validation.ValidatorFactory;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,13 +16,24 @@ import java.util.Optional;
 public class GammaService {
     private final GammaRepository gammaRepository;
     private final GammaMapperImpl gammaMapper;
+    private final ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
 
-    public Integer create(GammaCreateDto wellDataCreateDto) {
-        var entity = gammaMapper.map(wellDataCreateDto);
+    public Integer create(GammaCreateDto gammaCreateDto) {
+        var validator = validatorFactory.getValidator();
+        var  validateResult = validator.validate(gammaCreateDto);
+        if (!validateResult.isEmpty()){
+            throw new ConstraintViolationException(validateResult);
+        }
+        var entity = gammaMapper.map(gammaCreateDto);
         return gammaRepository.save(entity).getId();
     }
 
     public boolean update(GammaReadDto gammaReadDto) {
+        var validator = validatorFactory.getValidator();
+        var  validateResult = validator.validate(gammaReadDto);
+        if (!validateResult.isEmpty()){
+            throw new ConstraintViolationException(validateResult);
+        }
         var optional = gammaRepository.findById(gammaReadDto.id());
         if (optional.isPresent()) {
             Gamma entity = gammaMapper.mapFull(gammaReadDto);

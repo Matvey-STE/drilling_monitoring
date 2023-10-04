@@ -14,6 +14,7 @@ import org.matveyvs.entity.Role;
 import org.matveyvs.mapper.repo.UserMapperImpl;
 import org.matveyvs.utils.HibernateUtil;
 
+import javax.validation.ConstraintViolationException;
 import java.lang.reflect.Proxy;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -52,7 +53,7 @@ class UserServiceTest {
     private static UserCreateDto getUserObject() {
         return new UserCreateDto(
                 "Test",
-                "Test",
+                "matvey@mail.ru",
                 "Test",
                 Role.USER,
                 Timestamp.valueOf(LocalDateTime.now()),
@@ -64,7 +65,7 @@ class UserServiceTest {
     private static UserReadDto getUserUpdateObject() {
         return new UserReadDto(1,
                 "Update",
-                "Update",
+                "matvei@email.com",
                 "Update",
                 Role.USER,
                 Timestamp.valueOf(LocalDateTime.now()),
@@ -175,5 +176,24 @@ class UserServiceTest {
         Optional<UserReadDto> saved = userService.findById(id);
         boolean b = userService.checkIfExist(saved.get().userName(), saved.get().email());
         assertTrue(b);
+    }
+
+    private static UserCreateDto getConstraintUser() {
+        return new UserCreateDto(
+                null,
+                "Update",
+                null,
+                Role.USER,
+                null,
+                "Update",
+                "Update"
+        );
+    }
+
+    @Test
+    void constraintExpectation() {
+        UserCreateDto object = getConstraintUser();
+        assertThrows(ConstraintViolationException.class,
+                () ->  userService.create(object));
     }
 }

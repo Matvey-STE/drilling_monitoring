@@ -1,5 +1,13 @@
 package org.matveyvs.dto.repo;
 
-public record WellDataCreateDto(String companyName,
-                                String fieldName, String wellCluster, String well) {
+import javax.validation.constraints.NotNull;
+
+public record WellDataCreateDto(
+        @NotNull
+        String companyName,
+        @NotNull
+        String fieldName,
+        String wellCluster,
+        @NotNull
+        String well) {
 }

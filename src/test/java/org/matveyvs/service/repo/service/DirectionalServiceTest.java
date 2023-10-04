@@ -15,6 +15,7 @@ import org.matveyvs.mapper.repo.DownholeDataMapperImpl;
 import org.matveyvs.mapper.repo.WellDataMapperImpl;
 import org.matveyvs.utils.HibernateUtil;
 
+import javax.validation.ConstraintViolationException;
 import java.lang.reflect.Proxy;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -145,5 +146,21 @@ class DirectionalServiceTest {
         List<DirectionalReadDto> allByWellId = directionalService
                 .findAllByDownholeId(downholeDataReadDto.id());
         assertFalse(allByWellId.isEmpty());
+    }
+    private static DirectionalCreateDto getConstraintObject() {
+        return new DirectionalCreateDto(
+                null,
+                2.2,
+                3.3, 1.1, 2.2,
+                3.3, 1.1, 2.2, 3.3,
+                3.3, 1.1, 2.2, 3.3,
+                downholeDataReadDto
+        );
+    }
+    @Test
+    void constraintExpectation(){
+        DirectionalCreateDto object = getConstraintObject();
+        assertThrows(ConstraintViolationException.class,
+                () -> directionalService.create(object));
     }
 }

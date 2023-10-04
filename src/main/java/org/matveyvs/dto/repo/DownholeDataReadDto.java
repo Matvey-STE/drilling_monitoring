@@ -1,4 +1,11 @@
 package org.matveyvs.dto.repo;
 
-public record DownholeDataReadDto(Integer id, WellDataReadDto wellDataReadDto) {
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
+public record DownholeDataReadDto(
+        Integer id,
+        @NotNull
+        @Valid
+        WellDataReadDto wellDataReadDto) {
 }
