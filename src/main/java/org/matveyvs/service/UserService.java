@@ -28,7 +28,7 @@ public class UserService {
 
         var user = mapper.mapFrom(createUserDto);
         User userResult = userDao.save(user);
-        return Math.toIntExact(userResult.getUserId());
+        return Math.toIntExact(userResult.getId());
     }
 
     public Optional<UserDto> login(String email, String password) {
@@ -42,7 +42,6 @@ public class UserService {
             userDaoFilter = new UserDaoFilter(email, null, password);
         }
         return userDao.findByFilter(userDaoFilter).map(userMapper::mapFrom);
-
     }
 
     public boolean checkIfExist(String username, String email) {

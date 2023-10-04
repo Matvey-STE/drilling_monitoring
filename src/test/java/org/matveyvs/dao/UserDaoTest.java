@@ -30,7 +30,7 @@ class UserDaoTest {
     @AfterEach
     void tearDown() {
         try {
-            userDao.delete(saved.getUserId());
+            userDao.delete(saved.getId());
         } catch (Exception e) {
             log.info("Entity was deleted earlier " + e);
         }
@@ -77,10 +77,10 @@ class UserDaoTest {
     void findById() {
         User test = getUserObject();
         saved = userDao.save(test);
-        Optional<User> optional = userDao.findById(saved.getUserId());
+        Optional<User> optional = userDao.findById(saved.getId());
         assertTrue(optional.isPresent());
         User find = optional.get();
-        assertEquals(saved.getUserId(), find.getUserId());
+        assertEquals(saved.getId(), find.getId());
         assertEquals(test.getRole(), find.getRole());
         assertEquals(test.getPassword(), find.getPassword());
     }
@@ -89,13 +89,13 @@ class UserDaoTest {
     void update() {
         User test = getUserObject();
         saved = userDao.save(test);
-        User updatedObject = new User(saved.getUserId(), "updatedTest", "updatedTest", "updatedTestupdatedTest", Role.ADMIN, Timestamp.valueOf(LocalDateTime.now()),
+        User updatedObject = new User(saved.getId(), "updatedTest", "updatedTest", "updatedTestupdatedTest", Role.ADMIN, Timestamp.valueOf(LocalDateTime.now()),
                 "updatedTest", "updatedTest");
         boolean updated = userDao.update(updatedObject);
         assertTrue(updated);
-        Optional<User> find = userDao.findById(updatedObject.getUserId());
+        Optional<User> find = userDao.findById(updatedObject.getId());
         assertTrue(find.isPresent());
-        assertEquals(updatedObject.getUserId(), find.get().getUserId());
+        assertEquals(updatedObject.getId(), find.get().getId());
         assertEquals(updatedObject.getRole(), find.get().getRole());
     }
 
@@ -103,7 +103,7 @@ class UserDaoTest {
     void delete() {
         User test = getUserObject();
         saved = userDao.save(test);
-        boolean deleted = userDao.delete(saved.getUserId());
+        boolean deleted = userDao.delete(saved.getId());
         assertTrue(deleted);
     }
 
@@ -117,21 +117,21 @@ class UserDaoTest {
                 new UserDaoFilter(saved.getUserName(), null, null);
         if (userDao.findByFilter(userDaoFilter1).isPresent()) {
             User byFilter1 = userDao.findByFilter(userDaoFilter1).get();
-            assertEquals(saved.getUserId(), byFilter1.getUserId());
+            assertEquals(saved.getId(), byFilter1.getId());
         }
 
         UserDaoFilter userDaoFilter2 =
                 new UserDaoFilter(null, saved.getEmail(), null);
         if (userDao.findByFilter(userDaoFilter2).isPresent()) {
             User byFilter2 = userDao.findByFilter(userDaoFilter2).get();
-            assertEquals(saved.getUserId(), byFilter2.getUserId());
+            assertEquals(saved.getId(), byFilter2.getId());
         }
 
         UserDaoFilter userDaoFilter3 =
                 new UserDaoFilter(null, null, saved.getPassword());
         if (userDao.findByFilter(userDaoFilter3).isPresent()) {
             User byFilter3 = userDao.findByFilter(userDaoFilter3).get();
-            assertEquals(saved.getUserId(), byFilter3.getUserId());
+            assertEquals(saved.getId(), byFilter3.getId());
         }
 
 
@@ -139,7 +139,7 @@ class UserDaoTest {
                 new UserDaoFilter(saved.getUserName(), saved.getEmail(), saved.getPassword());
         if (userDao.findByFilter(userDaoFilter4).isPresent()) {
             User byFilter4 = userDao.findByFilter(userDaoFilter4).get();
-            assertEquals(saved.getUserId(), byFilter4.getUserId());
+            assertEquals(saved.getId(), byFilter4.getId());
         }
     }
 }

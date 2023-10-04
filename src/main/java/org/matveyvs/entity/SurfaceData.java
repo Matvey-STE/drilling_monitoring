@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -15,8 +14,8 @@ import java.sql.Timestamp;
 @Builder
 @Entity
 @Table(name = "surface_data")
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class SurfaceData {
+//@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class SurfaceData implements BaseEntity<Integer> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
@@ -34,8 +33,7 @@ public class SurfaceData {
     Double blockPos;
     @Column(name = "standpipe_pr")
     Double standpipePressure;
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "welldata_id")
     WellData wellData;
-
 }

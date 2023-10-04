@@ -16,7 +16,8 @@
         <property name="hibernate.cache.region_prefix.factory_class">
             org.hibernate.cache.jcache.internal.JCacheRegionFactory
         </property>
-        <property name="hibernate.generate_statistics">true</property>
+        <property name="hibernate.current_session_context_class">thread</property>
+<!--        <property name="hibernate.generate_statistics">true</property>-->
 
         <!--        <property name="connection.url">jdbc:h2:test</property>
                 <property name="connection.driver_class">org.h2.Driver</property>

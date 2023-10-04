@@ -4,9 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 
@@ -16,9 +13,9 @@ import javax.persistence.*;
 @Builder
 @Entity
 @Table(name = "well_data")
-@Audited
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "WellData")
-public class WellData {
+//@Audited
+//@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "WellData")
+public class WellData implements BaseEntity<Integer>{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
