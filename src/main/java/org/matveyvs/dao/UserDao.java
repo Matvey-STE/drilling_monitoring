@@ -10,6 +10,7 @@ import org.matveyvs.exception.DaoException;
 import org.matveyvs.utils.HibernateUtil;
 
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
@@ -115,7 +116,7 @@ public class UserDao implements Dao<Integer, User> {
                 hql += " AND u.password = :password";
             }
 
-            Query query = session.createQuery(hql, User.class);
+            TypedQuery<User> query = session.createQuery(hql, User.class);
 
             if (userDaoFilter.username() != null) {
                 query.setParameter("username", userDaoFilter.username());

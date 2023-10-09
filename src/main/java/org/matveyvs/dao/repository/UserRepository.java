@@ -5,7 +5,7 @@ import org.matveyvs.entity.User;
 import org.matveyvs.exception.DaoException;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,7 +36,7 @@ public class UserRepository extends BaseRepository<Integer, User> {
                 hql += " AND 1 = 0";
             }
 
-            Query query = entityManager.createQuery(hql, User.class);
+            TypedQuery<User> query = entityManager.createQuery(hql, User.class);
 
             if (userDaoFilter.username() != null) {
                 query.setParameter("username", userDaoFilter.username());

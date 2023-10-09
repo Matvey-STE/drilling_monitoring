@@ -14,7 +14,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "well_data")
 //@Audited
-//@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "WellData")
+//@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "WellData")
 public class WellData implements BaseEntity<Integer>{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
