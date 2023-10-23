@@ -14,6 +14,7 @@ public interface GammaMapper {
 
     @Mapping(target = "downholeData.wellData", source = "downholeDataReadDto.wellDataReadDto")
     @Mapping(target = "downholeData", source = "downholeDataReadDto")
+    @Mapping(target = "id", ignore = true)
     Gamma map(GammaCreateDto gammaCreateDto);
 
     @Mapping(target = "downholeData.wellData", source = "downholeDataReadDto.wellDataReadDto")

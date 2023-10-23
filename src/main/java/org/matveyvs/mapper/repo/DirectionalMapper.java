@@ -14,6 +14,7 @@ public interface DirectionalMapper {
 
     @Mapping(target = "downholeData.wellData", source = "downholeDataReadDto.wellDataReadDto")
     @Mapping(target = "downholeData", source = "downholeDataReadDto")
+    @Mapping(target = "id", ignore = true)
     Directional map(DirectionalCreateDto directionalCreateDto);
 
     @Mapping(target = "downholeData.wellData", source = "downholeDataReadDto.wellDataReadDto")

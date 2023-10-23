@@ -10,6 +10,7 @@ public interface DownholeDataMapper {
     @Mapping(target = "wellDataReadDto", source = "wellData")
     DownholeDataReadDto map(DownholeData downholeData);
     @Mapping(target = "wellData", source = "wellDataReadDto")
+    @Mapping(target = "id", ignore = true)
     DownholeData map(DownholeDataCreateDto downholeDataCreateDto);
     @Mapping(target = "wellData", source = "wellDataReadDto")
     DownholeData mapFull(DownholeDataReadDto downholeDataReadDto);

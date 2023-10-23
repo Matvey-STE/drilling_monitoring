@@ -11,6 +11,7 @@ public interface SurfaceDataMapper {
     @Mapping(target = "wellDataReadDto", source = "wellData")
     SurfaceDataReadDto map(SurfaceData surfaceData);
     @Mapping(target = "wellData", source = "wellDataReadDto")
+    @Mapping(target = "id", ignore = true)
     SurfaceData map(SurfaceDataCreateDto surfaceDataCreateDto);
     @Mapping(target = "wellData", source = "wellDataReadDto")
     SurfaceData mapFull(SurfaceDataReadDto surfaceDataReadDto);

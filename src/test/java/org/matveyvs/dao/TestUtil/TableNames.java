@@ -7,8 +7,4 @@ public enum TableNames {
     SURFACE_DATA,
     WELL_DATA,
     USERS
-//    USERS_AUD,
-//    WELL_DATA_AUD,
-//    REVINFO,
-
 }
