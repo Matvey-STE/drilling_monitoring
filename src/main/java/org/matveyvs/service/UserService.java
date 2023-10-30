@@ -1,6 +1,7 @@
 package org.matveyvs.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.matveyvs.mapper.UserMapper;
 import org.matveyvs.dto.UserCreateDto;
 import org.matveyvs.dto.UserReadDto;
@@ -16,17 +17,20 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 @Transactional
+@Log4j2
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
     public Integer create(UserCreateDto userCreateDto) {
         var entity = userMapper.map(userCreateDto);
+        log.info("Create method: " + entity);
         return userRepository.save(entity).getId();
     }
 
     public boolean update(UserReadDto userReadDto) {
         var optional = userRepository.findById(userReadDto.id());
+        log.info("Update method: " + optional);
         if (optional.isPresent()) {
             User user = userMapper.mapFull(userReadDto);
             userRepository.save(user);
@@ -37,15 +41,18 @@ public class UserService {
     }
 
     public Optional<UserReadDto> findById(Integer id) {
+        log.info("Find by Id method");
         return userRepository.findById(id).map(userMapper::map);
     }
 
     public List<UserReadDto> findAll() {
+        log.info("Find all method");
         return userRepository.findAll().stream().map(userMapper::map).toList();
     }
 
     public boolean delete(Integer id) {
         var maybeUser = userRepository.findById(id);
+        log.info("Delete method " + maybeUser);
         if (maybeUser.isPresent()) {
             userRepository.deleteById(id);
             return true;
@@ -55,10 +62,12 @@ public class UserService {
     }
 
     public Optional<UserReadDto> login(String email, String password) {
+        log.info("Login method for " + email);
         return userRepository.findByEmailAndPassword(email, password).map(userMapper::map);
     }
 
     public boolean checkIfExist(String username, String email) {
+        log.info("Check if exist method for " + username + " or " + email);
         return userRepository.findByEmailOrUserName(email, username).isPresent();
     }
 }

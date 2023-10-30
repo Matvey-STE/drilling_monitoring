@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="DEV_HOME" value="./src/logs/test" />
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss} %-5p [%logger] - %msg%n
+            </Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE-AUDIT"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss} %-5p [%logger] - %msg%n
+            </Pattern>
+        </encoder>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${DEV_HOME}/test.%d{yyyy-MM-dd}.%i.log
+            </fileNamePattern>
+            <maxFileSize>50MB</maxFileSize>
+            <maxHistory>1</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="FILE-AUDIT" />
+        <appender-ref ref="CONSOLE" />
+    </root>
+</configuration>

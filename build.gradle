@@ -39,14 +39,6 @@ dependencies {
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-
-    implementation group: 'jakarta.servlet', name: 'jakarta.servlet-api', version: '6.0.0'
-    implementation group: 'jakarta.servlet.jsp.jstl', name: 'jakarta.servlet.jsp.jstl-api', version: '3.0.0'
-    implementation group: 'org.glassfish.web', name: 'jakarta.servlet.jsp.jstl', version: '3.0.1'
-
-    implementation group: 'javax.el', name: 'javax.el-api', version: '3.0.0'
-    implementation group: 'org.glassfish', name: 'javax.el', version: '3.0.0'
-
 }
 
 test {

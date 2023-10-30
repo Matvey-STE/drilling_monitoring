@@ -1,6 +1,7 @@
 package org.matveyvs.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.matveyvs.dto.GammaCreateDto;
 import org.matveyvs.dto.GammaReadDto;
 import org.matveyvs.entity.Gamma;
@@ -15,17 +16,20 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 @Transactional
+@Log4j2
 public class GammaService {
     private final GammaRepository gammaRepository;
     private final GammaMapperImpl gammaMapper;
 
     public Integer create(GammaCreateDto gammaCreateDto) {
         var entity = gammaMapper.map(gammaCreateDto);
+        log.info("Create method: " + entity);
         return gammaRepository.save(entity).getId();
     }
 
     public boolean update(GammaReadDto gammaReadDto) {
         var optional = gammaRepository.findById(gammaReadDto.id());
+        log.info("Update method: " + optional);
         if (optional.isPresent()) {
             Gamma entity = gammaMapper.mapFull(gammaReadDto);
             gammaRepository.save(entity);
@@ -36,15 +40,18 @@ public class GammaService {
     }
 
     public Optional<GammaReadDto> findById(Integer id) {
+        log.info("Find by Id method");
         return gammaRepository.findById(id).map(gammaMapper::map);
     }
 
     public List<GammaReadDto> findAll() {
+        log.info("Find all method");
         return gammaRepository.findAll().stream().map(gammaMapper::map).toList();
     }
 
     public boolean delete(Integer id) {
         var maybeUser = gammaRepository.findById(id);
+        log.info("Delete method " + maybeUser);
         if (maybeUser.isPresent()) {
             gammaRepository.deleteById(id);
             return true;
@@ -54,6 +61,7 @@ public class GammaService {
     }
 
     public List<GammaReadDto> findAllByDownholeId(Integer downholeId) {
+        log.info("Find all by downhole id method");
         return gammaRepository.findAllByDownholeDataId(downholeId).stream()
                 .map(gammaMapper::map).toList();
     }

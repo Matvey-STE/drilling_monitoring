@@ -1,6 +1,4 @@
 spring:
-#  main:
-#    allow-bean-definition-overriding: true
   datasource:
     url: jdbc:postgresql://localhost:5432/drilling
     driver-class-name: org.postgresql.Driver
@@ -18,3 +16,9 @@ spring:
     view:
       prefix: /WEB-INF/jsp/
       suffix: .jsp
+#logging:
+#  level:
+#    root: info
+#  file:
+#    name: app-logging.log
+#    path: /src/logs/dev

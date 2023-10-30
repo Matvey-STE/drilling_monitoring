@@ -42,12 +42,14 @@ public class RegistrationServlet extends HttpServlet {
                                  @RequestParam("last_name") String lastName) {
         var exist = userService.checkIfExist(username, email);
         if (exist) {
+            log.info("Attempt to create user: username: " + username + " or email: " + email + " are already exists");
             mv.setViewName(REGISTRATION);
         } else {
             var userDto = new UserCreateDto(username, email, password, Role.valueOf(role), Timestamp.valueOf(LocalDateTime.now()),
                     firstName, lastName);
             try {
-                userService.create(userDto);
+                Integer integer = userService.create(userDto);
+                log.info("User " + username + " was created with id " + integer);
                 mv.setViewName(LOGIN);
             } catch (ValidationException e) {
                 e.printStackTrace();
