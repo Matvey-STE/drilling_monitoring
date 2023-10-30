@@ -9,9 +9,11 @@
 <div>
     <h2>Wells Data Information</h2>
     <c:forEach var="well" items="${requestScope.welldata}">
-        <h4>${well.id()}) Company name: ${well.companyName()}
+        <h4>
+                ${well.id()}) Company name: ${well.companyName()}
             Field name: ${well.fieldName()}
-            Well cluster: ${well.wellCluster()} Well: ${well.well()}</h4>
+            Well cluster: ${well.wellCluster()} Well: ${well.well()}
+        </h4>
         <a href='/well?surfaceDataId=${well.id()}'>Surface Data</a>
         <a href='/well?downholeDataId=${well.id()}'>Downhole Data</a>
     </c:forEach>

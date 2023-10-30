@@ -1,50 +1,42 @@
 package org.matveyvs.servlet;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.SneakyThrows;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.matveyvs.dto.UserDto;
+import org.matveyvs.dto.UserReadDto;
 import org.matveyvs.service.UserService;
-import org.matveyvs.utils.JspHelper;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
+import java.util.Optional;
 
 import static org.matveyvs.utils.UrlPath.LOGIN;
 
 @Slf4j
-@WebServlet(LOGIN)
-public class LoginServlet extends HttpServlet {
-    private final UserService userService = UserService.getInstance();
+@Controller
+@AllArgsConstructor
+public class LoginServlet{
+    private UserService userService;
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.getRequestDispatcher(JspHelper.getPath("login")).forward(req, resp);
+    @GetMapping(LOGIN)
+    public String showLoginPage() {
+        return "login";
     }
+    @PostMapping(LOGIN)
+    public String login(@RequestParam("email") String email, @RequestParam("password") String password,
+                        HttpServletRequest httpServletRequest, Model model) {
+        Optional<UserReadDto> login = userService.login(email, password);
 
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
-        userService.login(req.getParameter("email"), req.getParameter("password"))
-                .ifPresentOrElse(userDto -> onLoginSuccess(userDto, req, resp),
-                        () -> onLoginFail(req, resp));
-    }
-
-    @SneakyThrows
-    private void onLoginFail(HttpServletRequest req, HttpServletResponse resp) {
-        String email = req.getParameter("email");
-        log.info("Fail to login with email: " + email);
-        resp.sendRedirect("/login?error=true&email=" + email);
-    }
-
-    @SneakyThrows
-    private void onLoginSuccess(UserDto userDto, HttpServletRequest req, HttpServletResponse resp) {
-        log.info("User " +
-                 userDto +
-                 " was successfully login.");
-        req.getSession().setAttribute("user", userDto);
-        resp.sendRedirect("/wells");
+        if (login.isPresent()){
+            model.addAttribute("user", login);
+            httpServletRequest.getSession().setAttribute("user", login);
+            return "redirect:/wells";
+        }
+        else {
+            model.addAttribute("error", true);
+            model.addAttribute("email", email);
+            return "redirect:/login";
+        }
     }
 }

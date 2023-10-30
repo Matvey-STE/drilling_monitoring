@@ -1,29 +1,53 @@
 package org.matveyvs.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
-import javax.persistence.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
+@NamedEntityGraph(
+        name = "SurfaceAndDownholeListsFromWellData",
+        attributeNodes = {
+                @NamedAttributeNode("surfaceDataList"),
+                @NamedAttributeNode("downholeDataList")
+        })
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "surfaceDataList")
+@EqualsAndHashCode(exclude = "surfaceDataList")
 @Builder
 @Entity
 @Table(name = "well_data")
-//@Audited
-//@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "WellData")
-public class WellData implements BaseEntity<Integer>{
+public class WellData implements BaseEntity<Integer>, Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id;
+    private Integer id;
     @Column(name = "company_name")
-    String companyName;
+    private String companyName;
     @Column(name = "field_name")
-    String fieldName;
+    private String fieldName;
     @Column(name = "well_cluster")
-    String wellCluster;
-    String well;
+    private String wellCluster;
+    private String well;
+    @Builder.Default
+    @OneToMany(mappedBy = "wellData",fetch = FetchType.LAZY)
+    //set to prevent MultipleBagFetchException
+    private Set<SurfaceData> surfaceDataList = new HashSet<>();
+    @Builder.Default
+    @OneToMany(mappedBy = "wellData",fetch = FetchType.LAZY)
+    private List<DownholeData> downholeDataList = new ArrayList<>();
+
+    public void addSurfaceData(SurfaceData surfaceData){
+        surfaceDataList.add(surfaceData);
+        surfaceData.setWellData(this);
+    }
+    public void addDownholeData(DownholeData downholeData){
+        downholeDataList.add(downholeData);
+        downholeData.setWellData(this);
+    }
 }

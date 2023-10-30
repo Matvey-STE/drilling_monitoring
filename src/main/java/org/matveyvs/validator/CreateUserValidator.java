@@ -1,17 +1,17 @@
 package org.matveyvs.validator;
 
-import org.matveyvs.dto.CreateUserDto;
+import org.matveyvs.dto.UserCreateDto;
 import org.matveyvs.entity.Role;
+import org.springframework.stereotype.Component;
 
-public class CreateUserValidator implements Validator<CreateUserDto>{
-    private static final CreateUserValidator INSTANCE = new CreateUserValidator();
-    @Override
-    public ValidationResult isValid(CreateUserDto userDto){
+@Component
+public class CreateUserValidator implements Validator<UserCreateDto>{
+    public ValidationResult isValid(UserCreateDto userDto){
         var validationResult = new ValidationResult();
-        if (Role.find(userDto.role()).isEmpty()){
+        if (Role.find(String.valueOf(userDto.role())).isEmpty()){
             validationResult.add(Error.of("invalid.role", "Role is invalid"));
         }
-        if (userDto.username().isEmpty() || usernameValidation(userDto.username())){
+        if (userDto.userName().isEmpty() || usernameValidation(userDto.userName())){
             validationResult.add(Error.of("invalid.username", "Username is invalid"));
         }
         if (userDto.email().isEmpty()){
@@ -31,11 +31,5 @@ public class CreateUserValidator implements Validator<CreateUserDto>{
 
     private boolean usernameValidation(String username){
         return username.contains("@");
-    }
-    public static CreateUserValidator getInstance() {
-        return INSTANCE;
-    }
-    private CreateUserValidator(){
-
     }
 }

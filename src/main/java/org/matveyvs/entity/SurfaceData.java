@@ -1,39 +1,47 @@
 package org.matveyvs.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
-import javax.persistence.*;
 import java.sql.Timestamp;
 
+@NamedEntityGraph(
+        name = "WellDataFromSurface",
+        attributeNodes = {
+                @NamedAttributeNode("wellData")
+        })
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "wellData")
+@EqualsAndHashCode(exclude = "wellData")
 @Builder
 @Entity
 @Table(name = "surface_data")
-//@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class SurfaceData implements BaseEntity<Integer> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id;
+    private Integer id;
     @Column(name = "measure_date")
-    Timestamp measuredDate;
+    private Timestamp measuredDate;
     @Column(name = "mdepth")
-    Double measuredDepth;
+    private Double measuredDepth;
     @Column(name = "hole_depth")
-    Double holeDepth;
+    private Double holeDepth;
     @Column(name = "tvdepth")
-    Double tvDepth;
-    Double hookload;
-    Double wob;
+    private Double tvDepth;
+    private Double hookload;
+    private Double wob;
     @Column(name = "bleck_pos")
-    Double blockPos;
+    private Double blockPos;
     @Column(name = "standpipe_pr")
-    Double standpipePressure;
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    private Double standpipePressure;
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "welldata_id")
-    WellData wellData;
+    private WellData wellData;
+
+    public void setWellData(WellData wellData) {
+        this.wellData = wellData;
+        this.wellData.getSurfaceDataList().add(this);
+    }
 }

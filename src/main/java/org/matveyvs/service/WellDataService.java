@@ -1,27 +1,53 @@
 package org.matveyvs.service;
 
-import org.matveyvs.dao.WellDataDao;
-import org.matveyvs.dto.WellDataDto;
+import lombok.AllArgsConstructor;
+import org.matveyvs.dto.WellDataCreateDto;
+import org.matveyvs.dto.WellDataReadDto;
+import org.matveyvs.entity.WellData;
+import org.matveyvs.mapper.WellDataMapperImpl;
+import org.matveyvs.repository.WellDataRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
+@Service
+@AllArgsConstructor
+@Transactional
 public class WellDataService {
-    private static final WellDataService INSTANCE = new WellDataService();
-    private final WellDataDao wellDataDao = WellDataDao.getInstance();
+    private final WellDataRepository wellDataRepository;
+    private final WellDataMapperImpl wellDataMapper;
 
-    public List<WellDataDto> findAll() {
-        return wellDataDao.findAll().stream().map(wellData ->
-                        new WellDataDto(wellData.getId(), wellData.getCompanyName(), wellData.getFieldName(),
-                                wellData.getWellCluster(), wellData.getWell()))
-                .toList();
+    public Integer create(WellDataCreateDto wellDataCreateDto) {
+        var entity = wellDataMapper.map(wellDataCreateDto);
+        return wellDataRepository.save(entity).getId();
     }
 
-    private WellDataService() {
-
+    public boolean update(WellDataReadDto wellDataReadDto) {
+        var optional = wellDataRepository.findById(wellDataReadDto.id());
+        if (optional.isPresent()) {
+            WellData entity = wellDataMapper.mapFull(wellDataReadDto);
+            wellDataRepository.save(entity);
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public Optional<WellDataReadDto> findById(Integer id) {
+        return wellDataRepository.findById(id).map(wellDataMapper::map);
+    }
+    public List<WellDataReadDto> findAll() {
+        return wellDataRepository.findAll().stream().map(wellDataMapper::map).toList();
     }
 
-    public static WellDataService getInstance() {
-        return INSTANCE;
+    public boolean delete(Integer id) {
+        var maybeUser = wellDataRepository.findById(id);
+        if (maybeUser.isPresent()) {
+            wellDataRepository.deleteById(id);
+            return true;
+        } else {
+            return false;
+        }
     }
 }
-

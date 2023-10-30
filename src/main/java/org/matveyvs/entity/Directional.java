@@ -1,26 +1,26 @@
 package org.matveyvs.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.FetchProfile;
+import jakarta.persistence.*;
+import lombok.*;
 
-
-import javax.persistence.*;
 import java.sql.Timestamp;
-
-@FetchProfile(name = "withDownloadsDirectional", fetchOverrides = {
-        @FetchProfile.FetchOverride(entity = Gamma.class, association = "downholeData", mode = FetchMode.JOIN),
-        @FetchProfile.FetchOverride(entity = DownholeData.class, association = "wellData", mode = FetchMode.JOIN),
-})
+@NamedEntityGraph(
+        name = "DownholeDataAndWellDataFromDirectional",
+        attributeNodes = {
+                @NamedAttributeNode("downholeData"),
+                @NamedAttributeNode(value = "downholeData", subgraph = "wellData"),
+        },
+        subgraphs = {
+                @NamedSubgraph(name = "wellData",attributeNodes = @NamedAttributeNode("wellData"))
+        }
+        )
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"downholeData"})
+@EqualsAndHashCode(exclude = {"downholeData"})
 @Builder
 @Entity
-//@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Directional implements BaseEntity<Integer> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,7 +44,11 @@ public class Directional implements BaseEntity<Integer> {
     private Double azCorr;
     @Column(name = "toolface_corr")
     private Double toolfaceCorr;
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "downhole_id")
     private DownholeData downholeData;
+    public void setDownholeData(DownholeData downholeData) {
+        this.downholeData = downholeData;
+        this.downholeData.getDirectionalList().add(this);
+    }
 }

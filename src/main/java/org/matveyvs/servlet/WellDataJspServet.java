@@ -1,33 +1,27 @@
 package org.matveyvs.servlet;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.matveyvs.dto.WellDataReadDto;
 import org.matveyvs.service.WellDataService;
-import org.matveyvs.utils.JspHelper;
-import org.matveyvs.utils.LinkCreatorUtil;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 
-import java.io.IOException;
+import java.util.List;
 
-import static org.matveyvs.utils.UrlPath.WELLS;
+import static org.matveyvs.utils.UrlPath.*;
 
 @Slf4j
-@WebServlet(WELLS)
-public class WellDataJspServet extends HttpServlet {
-    private final WellDataService wellDataService = WellDataService.getInstance();
+@Controller
+@AllArgsConstructor
+public class WellDataJspServet {
+    private WellDataService wellDataService;
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        var wellData = wellDataService.findAll();
-        Object user = req.getSession().getAttribute("user");
-        log.info("User " +
-                 user +
-                 " visited " +
-                 LinkCreatorUtil.createLink(req.getRequestURI(), req.getQueryString()));
-        req.setAttribute("welldata", wellData);
-        req.getRequestDispatcher(JspHelper.getPath("wells")).forward(req, resp);
+    @GetMapping(WELLS)
+    public String showWellsPage(Model model) {
+        List<WellDataReadDto> wellData = wellDataService.findAll();
+        model.addAttribute("welldata", wellData);
+        return "wells";
     }
 }

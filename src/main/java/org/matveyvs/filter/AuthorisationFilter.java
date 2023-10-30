@@ -1,17 +1,16 @@
 package org.matveyvs.filter;
 
 import jakarta.servlet.*;
-import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Set;
 
 import static org.matveyvs.utils.UrlPath.LOGIN;
 import static org.matveyvs.utils.UrlPath.REGISTRATION;
-
-@WebFilter("/*")
+@Component
 public class AuthorisationFilter implements Filter {
     private static final Set<String> PUBLIC_PATH = Set.of(LOGIN, REGISTRATION);
     @Override

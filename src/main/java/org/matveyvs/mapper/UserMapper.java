@@ -1,23 +1,17 @@
 package org.matveyvs.mapper;
 
-import org.matveyvs.dto.UserDto;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.matveyvs.dto.UserCreateDto;
+import org.matveyvs.dto.UserReadDto;
 import org.matveyvs.entity.User;
 
-public class UserMapper implements Mapper<UserDto, User>{
-    private static final UserMapper INSTANCE = new UserMapper();
-    @Override
-    public UserDto mapFrom(User object) {
-        return new UserDto(Math.toIntExact(object.getId()),
-                object.getUserName(),
-                object.getEmail(),
-                object.getPassword(),
-                object.getRole(),
-                object.getCreatedAt(),
-                object.getFirstName(),
-                object.getLastName());
-    }
+@Mapper(componentModel = "Spring")
+public interface UserMapper {
+    UserReadDto map(User user);
+    @Mapping(target = "id", ignore = true)
+    User map(UserCreateDto userCreateDto);
 
-    public static UserMapper getInstance() {
-        return INSTANCE;
-    }
+    User mapFull(UserReadDto userReadDto);
+
 }

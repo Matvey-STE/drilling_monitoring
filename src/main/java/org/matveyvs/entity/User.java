@@ -1,11 +1,11 @@
 package org.matveyvs.entity;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Data
@@ -14,23 +14,21 @@ import java.sql.Timestamp;
 @Builder
 @Entity
 @Table(name = "users")
-//@Audited
-//@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "User")
 public class User implements BaseEntity<Integer>{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    Integer id;
+    private Integer id;
     @Column(name = "username")
-    String userName;
-    String email;
-    String password;
+    private String userName;
+    private String email;
+    private String password;
     @Enumerated(EnumType.STRING)
-    Role role;
+    private Role role;
     @Column(name = "creted_at")
-    Timestamp createdAt;
+    private Timestamp createdAt;
     @Column(name = "first_name")
-    String firstName;
+    private String firstName;
     @Column(name = "last_name")
-    String lastName;
+    private String lastName;
 }

@@ -1,25 +1,19 @@
 package org.matveyvs.servlet;
 
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.matveyvs.entity.User;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
+import static org.matveyvs.utils.UrlPath.LOGOUT;
 
 @Slf4j
-@WebServlet("/logout")
-public class LogoutServlet extends HttpServlet {
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Object user = req.getSession().getAttribute("user");
-        log.info("User " +
-                 user +
-                 " logout.");
+@Controller
+public class LogoutServlet {
+
+    @PostMapping(LOGOUT)
+    public String login(HttpServletRequest req){
         req.getSession().invalidate();
-        resp.sendRedirect("/login");
+        return "redirect:/login";
     }
 }

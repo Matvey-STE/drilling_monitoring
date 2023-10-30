@@ -18,8 +18,8 @@
     <input type="password" id="password" name="password" required><br><br>
 
     <label for="role">Role:</label>
-    <select id="role" name="role" required>
-    <c:forEach var="role" items="${requestScope.roles}">
+    <select id="role" name="role">
+    <c:forEach var="role" items="${requestScope.role}">
         <option label="${role}">${role}</option><br>
     </c:forEach>
     </select><br><br>

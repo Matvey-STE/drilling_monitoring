@@ -1,0 +1,20 @@
+spring:
+#  main:
+#    allow-bean-definition-overriding: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/drilling
+    driver-class-name: org.postgresql.Driver
+    username: matvey
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+  mvc:
+    view:
+      prefix: /WEB-INF/jsp/
+      suffix: .jsp
