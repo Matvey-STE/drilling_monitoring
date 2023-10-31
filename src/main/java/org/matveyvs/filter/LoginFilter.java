@@ -1,6 +1,10 @@
 package org.matveyvs.filter;
 
 import jakarta.servlet.*;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
