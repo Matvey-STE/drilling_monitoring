@@ -37,15 +37,16 @@ public class RandomWellDataBaseCreator {
     private static UserCreateDto getUserObject() {
         return new UserCreateDto(
                 "username",
-                "email",
+                "email@test.ru",
                 "password",
                 Role.USER,
                 Timestamp.valueOf(LocalDateTime.now()),
                 "First Name",
                 "Last Name");
     }
+
     private void createRandomWellInformation(String companyName, String fieldName,
-                                            String wellCluster, String well, Double startDepth, Double finishDepth) {
+                                             String wellCluster, String well, Double startDepth, Double finishDepth) {
         var wellDataId = wellDataService.create(createRandomWellData(companyName, fieldName, wellCluster, well));
         var byIdWell = wellDataService.findById(wellDataId);
 
@@ -129,7 +130,7 @@ public class RandomWellDataBaseCreator {
     }
 
     private WellDataCreateDto createRandomWellData(String companyName, String fieldName,
-                                          String wellCluster, String well) {
+                                                   String wellCluster, String well) {
         return new WellDataCreateDto(
                 companyName,
                 fieldName,

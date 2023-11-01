@@ -38,7 +38,7 @@ class UserServiceTest {
     private UserCreateDto getUser() {
         return new UserCreateDto(
                 "username service",
-                "email service",
+                "email@email.com",
                 "password service",
                 Role.USER,
                 Timestamp.valueOf(LocalDateTime.now()),
@@ -67,7 +67,7 @@ class UserServiceTest {
         var userUpdate = new UserReadDto(
                 integer,
                 "update user service",
-                "update email service",
+                "test@email.com",
                 "update password service",
                 Role.USER,
                 Timestamp.valueOf(LocalDateTime.now()),
