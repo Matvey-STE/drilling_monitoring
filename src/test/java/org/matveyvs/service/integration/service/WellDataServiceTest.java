@@ -4,16 +4,12 @@ import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.matveyvs.dto.UserReadDto;
 import org.matveyvs.dto.WellDataCreateDto;
 import org.matveyvs.dto.WellDataReadDto;
-import org.matveyvs.entity.Role;
 import org.matveyvs.service.WellDataService;
 import org.matveyvs.service.config.annotation.IT;
 import org.matveyvs.utils.RandomWellDataBaseCreator;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
