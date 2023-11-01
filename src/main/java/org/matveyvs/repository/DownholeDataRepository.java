@@ -12,11 +12,13 @@ import java.util.Optional;
 public interface DownholeDataRepository extends JpaRepository<DownholeData, Integer> {
 
     @EntityGraph(value = "WellDataFromDownhole")
+    @Override
     List<DownholeData> findAll();
 
     @EntityGraph(value = "WellDataFromDownhole")
     List<DownholeData> findAllByWellDataId(Integer id);
 
     @EntityGraph(value = "WellDataFromDownhole")
+    @Override
     Optional<DownholeData> findById(Integer id);
 }

@@ -18,8 +18,8 @@ import java.util.Optional;
 @Transactional
 @Log4j2
 public class DownholeDataService {
-    private final DownholeDataRepository downholeDataRepository;
-    private final DownholeDataMapperImpl downholeDataMapper;
+    private DownholeDataRepository downholeDataRepository;
+    private DownholeDataMapperImpl downholeDataMapper;
 
     public Integer create(DownholeDataCreateDto downholeDataCreateDto) {
         var entity = downholeDataMapper.map(downholeDataCreateDto);

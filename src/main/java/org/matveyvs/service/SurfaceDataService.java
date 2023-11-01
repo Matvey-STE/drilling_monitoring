@@ -18,8 +18,8 @@ import java.util.Optional;
 @Transactional
 @Log4j2
 public class SurfaceDataService {
-    private final SurfaceDataRepository surfaceDataRepository;
-    private final SurfaceDataMapperImpl surfaceDataMapper;
+    private SurfaceDataRepository surfaceDataRepository;
+    private SurfaceDataMapperImpl surfaceDataMapper;
 
     public Integer create(SurfaceDataCreateDto surfaceDataCreateDto) {
         var entity = surfaceDataMapper.map(surfaceDataCreateDto);

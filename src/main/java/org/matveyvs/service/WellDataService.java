@@ -18,8 +18,8 @@ import java.util.Optional;
 @Transactional
 @Log4j2
 public class WellDataService {
-    private final WellDataRepository wellDataRepository;
-    private final WellDataMapperImpl wellDataMapper;
+    private WellDataRepository wellDataRepository;
+    private WellDataMapperImpl wellDataMapper;
 
     public Integer create(WellDataCreateDto wellDataCreateDto) {
         var entity = wellDataMapper.map(wellDataCreateDto);

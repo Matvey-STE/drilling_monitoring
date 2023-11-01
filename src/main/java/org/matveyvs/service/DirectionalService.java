@@ -18,8 +18,8 @@ import java.util.Optional;
 @Transactional
 @Log4j2
 public class DirectionalService {
-    private final DirectionalRepository directionalRepository;
-    private final DirectionalMapperImpl directionalMapper;
+    private DirectionalRepository directionalRepository;
+    private DirectionalMapperImpl directionalMapper;
 
     public Integer create(DirectionalCreateDto directionalCreateDto) {
         var entity = directionalMapper.map(directionalCreateDto);

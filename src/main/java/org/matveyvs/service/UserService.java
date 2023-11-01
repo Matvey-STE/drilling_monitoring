@@ -21,9 +21,9 @@ import java.util.Optional;
 @Transactional
 @Log4j2
 public class UserService {
-    private final UserRepository userRepository;
-    private final UserMapper userMapper;
-    private final Validator validator;
+    private UserRepository userRepository;
+    private UserMapper userMapper;
+    private Validator validator;
 
     public Integer create(UserCreateDto userCreateDto) {
         var validate = validator.validate(userCreateDto);
@@ -32,7 +32,10 @@ public class UserService {
         }
         var entity = userMapper.map(userCreateDto);
         log.info("Create method: " + entity);
-        return userRepository.save(entity).getId();
+
+        var id = userRepository.save(entity);
+
+        return id.getId();
     }
 
     public boolean update(UserReadDto userReadDto) {

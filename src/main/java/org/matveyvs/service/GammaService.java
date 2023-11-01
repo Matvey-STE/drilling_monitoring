@@ -18,8 +18,8 @@ import java.util.Optional;
 @Transactional
 @Log4j2
 public class GammaService {
-    private final GammaRepository gammaRepository;
-    private final GammaMapperImpl gammaMapper;
+    private GammaRepository gammaRepository;
+    private GammaMapperImpl gammaMapper;
 
     public Integer create(GammaCreateDto gammaCreateDto) {
         var entity = gammaMapper.map(gammaCreateDto);
