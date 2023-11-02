@@ -18,13 +18,13 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 @Log4j2
 public class UserService {
     private UserRepository userRepository;
     private UserMapper userMapper;
     private Validator validator;
-
+    @Transactional
     public Integer create(UserCreateDto userCreateDto) {
         var validate = validator.validate(userCreateDto);
         if (!validate.isEmpty()){
@@ -37,7 +37,7 @@ public class UserService {
 
         return id.getId();
     }
-
+    @Transactional
     public boolean update(UserReadDto userReadDto) {
         var validate = validator.validate(userReadDto);
         if (!validate.isEmpty()){
@@ -63,7 +63,7 @@ public class UserService {
         log.info("Find all method");
         return userRepository.findAll().stream().map(userMapper::map).toList();
     }
-
+    @Transactional
     public boolean delete(Integer id) {
         var maybeUser = userRepository.findById(id);
         log.info("Delete method " + maybeUser);

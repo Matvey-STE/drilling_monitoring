@@ -15,18 +15,18 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 @Log4j2
 public class GammaService {
     private GammaRepository gammaRepository;
     private GammaMapperImpl gammaMapper;
-
+    @Transactional
     public Integer create(GammaCreateDto gammaCreateDto) {
         var entity = gammaMapper.map(gammaCreateDto);
         log.info("Create method: " + entity);
         return gammaRepository.save(entity).getId();
     }
-
+    @Transactional
     public boolean update(GammaReadDto gammaReadDto) {
         var optional = gammaRepository.findById(gammaReadDto.id());
         log.info("Update method: " + optional);
@@ -48,7 +48,7 @@ public class GammaService {
         log.info("Find all method");
         return gammaRepository.findAll().stream().map(gammaMapper::map).toList();
     }
-
+    @Transactional
     public boolean delete(Integer id) {
         var maybeUser = gammaRepository.findById(id);
         log.info("Delete method " + maybeUser);

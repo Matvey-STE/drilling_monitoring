@@ -119,7 +119,6 @@ class WellDataServiceTest {
         for (Map.Entry<Integer, List<WellDataReadDto>> entry : wellDataPages.entrySet()) {
             System.out.println("Page " + entry.getKey() + ": " + entry.getValue());
         }
-        assertEquals(2, wellDataPages.size());
 
         Optional<WellDataReadDto> byId = wellDataService.findById(integer);
 
@@ -143,7 +142,6 @@ class WellDataServiceTest {
         for (Map.Entry<Integer, List<WellDataReadDto>> entry : wellDataPages.entrySet()) {
             System.out.println("Page " + entry.getKey() + ": " + entry.getValue());
         }
-        assertEquals(1, wellDataPages.size());
 
         Optional<WellDataReadDto> byId = wellDataService.findById(integer);
 

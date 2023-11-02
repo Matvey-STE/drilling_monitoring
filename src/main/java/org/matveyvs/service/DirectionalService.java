@@ -15,18 +15,18 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 @Log4j2
 public class DirectionalService {
     private DirectionalRepository directionalRepository;
     private DirectionalMapperImpl directionalMapper;
-
+    @Transactional
     public Integer create(DirectionalCreateDto directionalCreateDto) {
         var entity = directionalMapper.map(directionalCreateDto);
         log.info("Create method: " + entity);
         return directionalRepository.save(entity).getId();
     }
-
+    @Transactional
     public boolean update(DirectionalReadDto directionalReadDto) {
         var optional = directionalRepository.findById(directionalReadDto.id());
         log.info("Update method: " + optional);
@@ -48,7 +48,7 @@ public class DirectionalService {
         log.info("Find all method");
         return directionalRepository.findAll().stream().map(directionalMapper::map).toList();
     }
-
+    @Transactional
     public boolean delete(Integer id) {
         var maybeUser = directionalRepository.findById(id);
         log.info("Delete method " + maybeUser);

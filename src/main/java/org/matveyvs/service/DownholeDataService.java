@@ -15,18 +15,18 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 @Log4j2
 public class DownholeDataService {
     private DownholeDataRepository downholeDataRepository;
     private DownholeDataMapperImpl downholeDataMapper;
-
+    @Transactional
     public Integer create(DownholeDataCreateDto downholeDataCreateDto) {
         var entity = downholeDataMapper.map(downholeDataCreateDto);
         log.info("Create method: " + entity);
         return downholeDataRepository.save(entity).getId();
     }
-
+    @Transactional
     public boolean update(DownholeDataReadDto downholeDataReadDto) {
         var optional = downholeDataRepository.findById(downholeDataReadDto.id());
         log.info("Update method: " + optional);
@@ -48,7 +48,7 @@ public class DownholeDataService {
         log.info("Find all method");
         return downholeDataRepository.findAll().stream().map(downholeDataMapper::map).toList();
     }
-
+    @Transactional
     public boolean delete(Integer id) {
         var maybeUser = downholeDataRepository.findById(id);
         log.info("Delete method " + maybeUser);

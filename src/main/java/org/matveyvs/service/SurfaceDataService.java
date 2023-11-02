@@ -15,18 +15,18 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 @Log4j2
 public class SurfaceDataService {
     private SurfaceDataRepository surfaceDataRepository;
     private SurfaceDataMapperImpl surfaceDataMapper;
-
+    @Transactional
     public Integer create(SurfaceDataCreateDto surfaceDataCreateDto) {
         var entity = surfaceDataMapper.map(surfaceDataCreateDto);
         log.info("Create method: " + entity);
         return surfaceDataRepository.save(entity).getId();
     }
-
+    @Transactional
     public boolean update(SurfaceDataReadDto surfaceDataReadDto) {
         var optional = surfaceDataRepository.findById(surfaceDataReadDto.id());
         log.info("Update method: " + optional);
@@ -48,7 +48,7 @@ public class SurfaceDataService {
         log.info("Find all method");
         return surfaceDataRepository.findAll().stream().map(surfaceDataMapper::map).toList();
     }
-
+    @Transactional
     public boolean delete(Integer id) {
         var maybeUser = surfaceDataRepository.findById(id);
         log.info("Delete method " + maybeUser);

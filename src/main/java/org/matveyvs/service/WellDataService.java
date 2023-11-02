@@ -19,18 +19,18 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 @Log4j2
 public class WellDataService {
     private WellDataRepository wellDataRepository;
     private WellDataMapperImpl wellDataMapper;
-
+    @Transactional
     public Integer create(WellDataCreateDto wellDataCreateDto) {
         var entity = wellDataMapper.map(wellDataCreateDto);
         log.info("Create method: " + entity);
         return wellDataRepository.save(entity).getId();
     }
-
+    @Transactional
     public boolean update(WellDataReadDto wellDataReadDto) {
         var optional = wellDataRepository.findById(wellDataReadDto.id());
         log.info("Update method: " + optional);
@@ -52,7 +52,7 @@ public class WellDataService {
         log.info("Find all method");
         return wellDataRepository.findAll().stream().map(wellDataMapper::map).toList();
     }
-
+    @Transactional
     public boolean delete(Integer id) {
         var maybeUser = wellDataRepository.findById(id);
         log.info("Delete method " + maybeUser);
