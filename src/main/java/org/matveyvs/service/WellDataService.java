@@ -7,10 +7,14 @@ import org.matveyvs.dto.WellDataReadDto;
 import org.matveyvs.entity.WellData;
 import org.matveyvs.mapper.WellDataMapperImpl;
 import org.matveyvs.repository.WellDataRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -58,5 +62,22 @@ public class WellDataService {
         } else {
             return false;
         }
+    }
+
+    public Map<Integer, List<WellDataReadDto>> getWellDataPages(PageRequest pageRequest) {
+        Map<Integer, List<WellDataReadDto>> pageMap = new HashMap<>();
+        Page<WellData> wellDataPage = wellDataRepository.getAllBy(pageRequest);
+        int pageNumber = 1;
+        while (wellDataPage.hasContent()) {
+            var list = wellDataPage.getContent().stream().map(wellDataMapper::map).toList();
+            pageMap.put(pageNumber++, list);
+
+            if (wellDataPage.hasNext()) {
+                wellDataPage = wellDataRepository.getAllBy(wellDataPage.nextPageable());
+            } else {
+                break;
+            }
+        }
+        return pageMap;
     }
 }

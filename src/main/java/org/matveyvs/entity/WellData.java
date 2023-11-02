@@ -18,8 +18,8 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = "surfaceDataList")
-@EqualsAndHashCode(exclude = "surfaceDataList")
+@ToString(exclude = {"surfaceDataList","downholeDataList"})
+@EqualsAndHashCode(exclude = {"surfaceDataList","downholeDataList"})
 @Builder
 @Entity
 @Table(name = "well_data")

@@ -9,8 +9,11 @@ import org.matveyvs.dto.WellDataReadDto;
 import org.matveyvs.service.WellDataService;
 import org.matveyvs.service.config.annotation.IT;
 import org.matveyvs.utils.RandomWellDataBaseCreator;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,6 +52,7 @@ class WellDataServiceTest {
         assertTrue(byId.isPresent());
         byId.ifPresent(wellDataReadDto ->
                 assertEquals(wellDataReadDto.companyName(), getWellDataDto().companyName()));
+        wellDataService.delete(integer);
     }
 
     @Test
@@ -101,5 +105,52 @@ class WellDataServiceTest {
         Integer integer = wellDataService.create(well);
         boolean delete = wellDataService.delete(integer);
         assertTrue(delete);
+    }
+
+    @Test
+    void getWellDataPagesSortById() {
+        var company = getWellDataDto();
+        Integer integer = wellDataService.create(company);
+
+        var sort = Sort.by("id");
+        var pageRequest = PageRequest.of(0, 2, sort.descending());
+        var wellDataPages = wellDataService.getWellDataPages(pageRequest);
+        System.out.println("Well Data Pages:");
+        for (Map.Entry<Integer, List<WellDataReadDto>> entry : wellDataPages.entrySet()) {
+            System.out.println("Page " + entry.getKey() + ": " + entry.getValue());
+        }
+        assertEquals(2, wellDataPages.size());
+
+        Optional<WellDataReadDto> byId = wellDataService.findById(integer);
+
+        assertEquals(wellDataPages.get(1).get(0).id(), byId.get().id(),
+                "check first id element in list");
+        wellDataService.delete(integer);
+    }
+
+    @Test
+    void getWellDataPagesFromSecondPageSortByCompany() {
+        var company = new WellDataCreateDto(
+                "Zinger",
+                "Field Name",
+                "Well Cluster",
+                "Well");
+        Integer integer = wellDataService.create(company);
+        var sort = Sort.by("companyName");
+        var pageRequest = PageRequest.of(1, 2, sort);
+        var wellDataPages = wellDataService.getWellDataPages(pageRequest);
+        System.out.println("Well Data Pages:");
+        for (Map.Entry<Integer, List<WellDataReadDto>> entry : wellDataPages.entrySet()) {
+            System.out.println("Page " + entry.getKey() + ": " + entry.getValue());
+        }
+        assertEquals(1, wellDataPages.size());
+
+        Optional<WellDataReadDto> byId = wellDataService.findById(integer);
+
+        List<WellDataReadDto> wellDataReadDtos = wellDataPages.get(1);
+        assertEquals(wellDataReadDtos.get(1).companyName(), byId.get().companyName(),
+                "check first id element in list");
+        wellDataService.delete(integer);
+
     }
 }

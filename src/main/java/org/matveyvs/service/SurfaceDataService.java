@@ -39,7 +39,6 @@ public class SurfaceDataService {
         }
     }
 
-    @Transactional
     public Optional<SurfaceDataReadDto> findById(Integer id) {
         log.info("Find by Id method");
         return surfaceDataRepository.findById(id).map(surfaceDataMapper::map);
