@@ -20,7 +20,7 @@ import static org.matveyvs.utils.UrlPath.WELL;
 @Slf4j
 @Controller
 @AllArgsConstructor
-public class WellJspServlet {
+public class WellJspController {
     private SurfaceDataService surfaceDataService;
     private DownholeDataService downholeDataService;
     private GammaService gammaService;

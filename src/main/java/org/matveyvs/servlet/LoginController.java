@@ -19,7 +19,7 @@ import static org.matveyvs.utils.UrlPath.LOGIN;
 @Slf4j
 @Controller
 @AllArgsConstructor
-public class LoginServlet {
+public class LoginController {
     private UserService userService;
 
     @GetMapping(LOGIN)

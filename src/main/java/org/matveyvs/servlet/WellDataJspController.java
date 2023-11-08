@@ -18,7 +18,7 @@ import static org.matveyvs.utils.UrlPath.*;
 @Slf4j
 @Controller
 @AllArgsConstructor
-public class WellDataJspServet {
+public class WellDataJspController {
     private WellDataService wellDataService;
 
     @GetMapping(WELLS)

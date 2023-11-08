@@ -25,7 +25,7 @@ import static org.matveyvs.utils.UrlPath.REGISTRATION;
 
 @Slf4j
 @Controller
-public class RegistrationServlet extends HttpServlet {
+public class RegistrationController extends HttpServlet {
     @Autowired
     private UserService userService;
 

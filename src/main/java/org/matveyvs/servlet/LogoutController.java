@@ -12,7 +12,7 @@ import static org.matveyvs.utils.UrlPath.LOGOUT;
 
 @Slf4j
 @Controller
-public class LogoutServlet {
+public class LogoutController {
 
     @PostMapping(LOGOUT)
     public String logout(HttpServletRequest req) {
