@@ -1,4 +1,4 @@
-package org.matveyvs.servlet;
+package org.matveyvs.http.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;

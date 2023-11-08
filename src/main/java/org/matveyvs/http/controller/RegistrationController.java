@@ -1,14 +1,13 @@
-package org.matveyvs.servlet;
+package org.matveyvs.http.controller;
 
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.matveyvs.dto.UserCreateDto;
 import org.matveyvs.entity.Role;
 import org.matveyvs.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,9 +24,10 @@ import static org.matveyvs.utils.UrlPath.REGISTRATION;
 
 @Slf4j
 @Controller
-public class RegistrationController extends HttpServlet {
-    @Autowired
-    private UserService userService;
+@AllArgsConstructor
+public class RegistrationController {
+
+    private final UserService userService;
 
     @GetMapping(REGISTRATION)
     public ModelAndView showRegistrationPage(ModelAndView mv, HttpServletRequest request) {
