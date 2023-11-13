@@ -24,9 +24,9 @@ public class WellDataJspController {
     @GetMapping(WELLS)
     public String showWellsPage(Model model, HttpServletRequest request) {
         var user = (Optional<UserReadDto>) request.getSession().getAttribute("user");
-        log.info("User " + user.get().userName() + " visited " + WELLS + "page");
+        log.info("User " + user.get().username() + " visited " + WELLS + "page");
         List<WellDataReadDto> wellData = wellDataService.findAll();
         model.addAttribute("welldata", wellData);
-        return "wells";
+        return "well/wells";
     }
 }

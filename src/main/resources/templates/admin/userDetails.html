@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{_layout}">
+
+<body>
+<div layout:fragment="content">
+    <div class="row">
+        <div class="col-lg-12">
+            <h3 class="page-header"><i class="fa fa-laptop"></i> User Details</h3>
+            <ol class="breadcrumb">
+                <li><i class="fa fa-home"></i><a href="/index">Home</a></li>
+                <li><i class="fa "></i><a href="/admin">Admin Department</a></li>
+                <li><i class="fa "></i><a href="/users">List of Users</a></li>
+                <li><i class="fa fa-laptop"></i>User Details</li>
+            </ol>
+        </div>
+    </div>
+    <section class="wrapper">
+        <div class="container" style="width: auto">
+            <div class="row">
+                <div class="col-lg-12">
+                    <form class="form-horizontal " th:method="post">
+                        <div class="col-lg-8">
+                            <section class="panel">
+                                <header class="panel-heading">
+                                    User Details
+                                </header>
+                                <div class="panel-body">
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-4"> Username</label>
+                                        <div class="col-sm-6">
+                                            <input id="username" th:value="${user.username()}" readonly name="username" type="text"
+                                                   class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-4"> Email</label>
+                                        <div class="col-sm-6">
+                                            <input name="email" th:value="${user.email()}" readonly type="text" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-4"> Password</label>
+                                        <div class="col-sm-6">
+                                            <input name="password" th:value="${user.password()}" readonly type="text"
+                                                   class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-4">Role</label>
+                                        <div class="col-sm-6">
+                                            <input name="role" th:value="${user.role()}" readonly type="text"
+                                                   class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-4"> First Name</label>
+                                        <div class="col-sm-6">
+                                            <input name="firstName" th:value="${user.firstName()}" readonly type="text"
+                                                   class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-4"> Last Name</label>
+                                        <div class="col-sm-6">
+                                            <input name="lastName" th:value="${user.lastName()}" readonly type="text"
+                                                   class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="panel">
+                                <div class="panel-body">
+                                    <a href="/users" class="btn btn-warning">Exit</a>
+                                </div>
+                            </section>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>

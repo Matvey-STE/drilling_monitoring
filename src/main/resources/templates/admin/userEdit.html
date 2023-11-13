@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{_layout}">
+
+<body>
+<div layout:fragment="content">
+    <div class="row">
+        <div class="col-lg-12">
+            <h3 class="page-header"><i class="fa fa-laptop"></i> Edit User</h3>
+            <ol class="breadcrumb">
+                <li><i class="fa fa-home"></i><a href="/index">Home</a></li>
+                <li><i class="fa "></i><a href="/admin">Admin Department</a></li>
+                <li><i class="fa "></i><a href="/users">List of Users</a></li>
+                <li><i class="fa fa-laptop"></i>Edit User</li>
+            </ol>
+        </div>
+    </div>
+    <section class="wrapper">
+        <div class="container" style="width: auto">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div th:if="${errors}">
+                        <p style="color: red" th:each="error : ${errors}" th:text="${error.defaultMessage}">Error
+                            message</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <form class="form-horizontal " th:action="@{'/users/' + ${user.id()} + '/update'}" th:method="post">
+                        <div class="col-lg-8">
+                            <section class="panel">
+                                <header class="panel-heading">
+                                    Update User
+                                </header>
+                                <div class="panel-body">
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-4"> Username</label>
+                                        <div class="col-sm-6">
+                                            <input id="username" th:value="${user.username()}" name="username" type="text"
+                                                   class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-4"> Email</label>
+                                        <div class="col-sm-6">
+                                            <input name="email" th:value="${user.email()}" type="text" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-4"> Password</label>
+                                        <div class="col-sm-6">
+                                            <input name="password" th:value="${user.password()}" type="text"
+                                                   class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-4">Role</label>
+                                        <div class="col-sm-6">
+                                            <select name="role" class="form-control">
+                                                <option th:each="role : ${roles}"
+                                                        th:value="${role}"
+                                                        th:selected="${role == user.role()}"
+                                                        th:text="${role}">Choose a Role
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-4"> First Name</label>
+                                        <div class="col-sm-6">
+                                            <input name="firstName" th:value="${user.firstName()}" type="text"
+                                                   class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-4"> Last Name</label>
+                                        <div class="col-sm-6">
+                                            <input name="lastName" th:value="${user.lastName()}" type="text"
+                                                   class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="panel">
+                                <div class="panel-body">
+                                    <button type="submit" class="btn btn-success">Update User</button>
+                                    <a href="/users" class="btn btn-warning">Exit</a>
+                                </div>
+                            </section>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>

@@ -17,8 +17,8 @@ public class LogoutController {
     @PostMapping(LOGOUT)
     public String logout(HttpServletRequest req) {
         var user = (Optional<UserReadDto>) req.getSession().getAttribute("user");
-        log.info("User " + user.get().userName() + " logout");
+        log.info("User " + user.get().username() + " logout");
         req.getSession().invalidate();
-        return "redirect:/login";
+        return "redirect:user/login";
     }
 }

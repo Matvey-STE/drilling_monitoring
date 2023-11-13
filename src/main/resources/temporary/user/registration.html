@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registration</title>
+</head>
+<body>
+<form th:action="@{/registration}" method="post" th:object="${user}">
+    <label for="username">Username:
+        <input id="username" type="text" name="username" th:value="*{username()}">
+    </label><br><br>
+    <label for="email">Email:
+        <input id="email" type="text" name="email" th:value="*{email}">
+    </label><br><br>
+    <input id="createdAt" type="datetime-local" name="createdAt" th:value="${#dates.format(#dates.createNow(),'yyyy-MM-ddTHH:mm:ss.SSSSSS')}" style="display: none;">
+    <label for="password">Password:
+        <input id="password" type="text" name="password" th:value="*{password}">
+    </label><br><br>
+    <label for="firstname">Firstname:
+        <input id="firstname" type="text" name="firstName" th:value="*{firstName()}">
+    </label><br><br>
+    <label for="lastname">Lastname:
+        <input id="lastname" type="text" name="lastName" th:value="*{lastName()}">
+    </label><br><br>
+    <div>
+        <label>Role:
+        <select th:id="userRole" th:name="role">
+            <option th:each="role : ${roles}" th:value="${role}" th:selected="${role == user.role}" th:text="${role}">
+                Role name
+            </option>
+        </select>
+        </label>
+    </div>
+    <br>
+    <button type="submit">Register</button>
+</form><br>
+<form action="/login">
+    <button type="submit">Login</button>
+</form>
+<div th:if="${errors}">
+    <p style="color: red" th:each="error : ${errors}" th:text="${error.defaultMessage}">Error message</p>
+</div>
+</body>
+</html>

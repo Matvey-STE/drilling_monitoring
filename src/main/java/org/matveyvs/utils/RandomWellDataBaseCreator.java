@@ -40,7 +40,6 @@ public class RandomWellDataBaseCreator {
                 "email@test.ru",
                 "password",
                 Role.USER,
-                Timestamp.valueOf(LocalDateTime.now()),
                 "First Name",
                 "Last Name");
     }

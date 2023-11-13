@@ -14,19 +14,17 @@ import java.sql.Timestamp;
 @Builder
 @Entity
 @Table(name = "users")
-public class User implements BaseEntity<Integer>{
+public class User implements BaseEntity<Integer> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Integer id;
     @Column(name = "username")
-    private String userName;
+    private String username;
     private String email;
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
-    @Column(name = "creted_at")
-    private Timestamp createdAt;
     @Column(name = "first_name")
     private String firstName;
     @Column(name = "last_name")

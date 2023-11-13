@@ -8,7 +8,10 @@ import org.matveyvs.service.UserService;
 import org.matveyvs.utils.LinkCreatorUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,34 +26,29 @@ public class LoginController {
     private UserService userService;
 
     @GetMapping(LOGIN)
-    public String showLoginPage(@RequestParam(value = "email", required = false) String email) {
+    public String showLoginPage() {
         log.info("User visited /login page");
-        if (email != null) {
-            log.info("Error with parameter email " + email);
-        }
-        return "login";
+        return "user/login";
     }
 
     @PostMapping(LOGIN)
-    public String login(@RequestParam("email") String email, @RequestParam("password") String password,
-                        HttpServletRequest request, Model model) {
+    public String login(@RequestParam("username") String email,
+                        @RequestParam("password") String password,
+                        RedirectAttributes redirectAttributes,
+                        HttpServletRequest request,
+                        Model model) {
         Optional<UserReadDto> login = userService.login(email, password);
-
         if (login.isPresent()) {
             model.addAttribute("user", login);
             request.getSession().setAttribute("user", login);
-            log.info("User with username " + login.get().userName() + "successfully login");
+            log.info("User with username " + login.get().username() + "successfully login");
             return "redirect:/wells";
         } else {
-            Map<String, String> queryParams = new HashMap<>();
-            queryParams.put("error", "true");
-            queryParams.put("email", email);
-
-            request.setAttribute("email", email);
-            request.setAttribute("error", true);
-
+            String errorMessage = "Incorrect username, email, or password. Please try again.";
+            redirectAttributes.addFlashAttribute("username", email);
+            redirectAttributes.addFlashAttribute("loginMessage", errorMessage);
             log.info("Wrong password or username");
-            return "redirect:" + LinkCreatorUtil.createLink(LOGIN, queryParams);
+            return "redirect:" + LOGIN;
         }
     }
 }

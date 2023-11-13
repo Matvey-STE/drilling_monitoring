@@ -35,7 +35,7 @@ public class WellJspController {
         var user = (Optional<UserReadDto>) request.getSession().getAttribute("user");
         String username = null;
         if (user.isPresent()) {
-            username = user.get().userName();
+            username = user.get().username();
         }
 
         if (surfaceDataId != null) {
@@ -66,6 +66,6 @@ public class WellJspController {
             log.info("User " + username + " visited " +
                      LinkCreatorUtil.createLink(WELL, "directionalId", directionalId.toString()));
         }
-        return "well";
+        return "well/well";
     }
 }
