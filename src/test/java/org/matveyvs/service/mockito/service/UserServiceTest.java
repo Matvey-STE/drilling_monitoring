@@ -18,8 +18,6 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,7 +40,6 @@ class UserServiceTest {
                 "email@email.ru",
                 "password",
                 Role.USER,
-                Timestamp.valueOf(LocalDateTime.now()),
                 "name",
                 "last name");
         Set<ConstraintViolation<UserCreateDto>> set = validator.validate(userCreateDtoValidationTest);
@@ -53,7 +50,6 @@ class UserServiceTest {
                 "email@email.ru",
                 "password",
                 Role.USER,
-                Timestamp.valueOf(LocalDateTime.now()),
                 "name",
                 "last name");
         Set<ConstraintViolation<UserCreateDto>> validate = validator.validate(userCreateDto);

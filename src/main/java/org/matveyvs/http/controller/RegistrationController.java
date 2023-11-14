@@ -8,14 +8,13 @@ import org.matveyvs.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.matveyvs.utils.UrlPath.*;
@@ -31,21 +30,31 @@ public class RegistrationController {
                                        @ModelAttribute("user") UserCreateDto userDto) {
         model.addAttribute("user", userDto);
         model.addAttribute("roles", List.of(Role.values()));
-        model.addAttribute("dateOfCreation", Timestamp.valueOf(LocalDateTime.now()));
-        return "user/registration";
+        return "admin/registration";
     }
 
     @PostMapping(REGISTRATION)
     public String register(@ModelAttribute @Validated UserCreateDto userDto,
                            BindingResult bindingResult,
-                           RedirectAttributes redirectAttributes)
-    {
+                           RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("user", userDto);
             redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
             return "redirect:/registration";
         }
-        var userReadDto = userService.create(userDto);
-        return "redirect:/users";
+        try {
+            var id = userService.create(userDto);
+            log.info("User" + userDto + " with id: " + id + " was created");
+        } catch (Exception exception) {
+            if (exception.getMessage().contains("unique constraint")) {
+                String message = "Username or email are already exists";
+                ObjectError error = new ObjectError("exists.constraint", message);
+                bindingResult.addError(error);
+            }
+            redirectAttributes.addFlashAttribute("user", userDto);
+            redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
+            return "redirect:/registration";
+        }
+        return "redirect:/login";
     }
 }

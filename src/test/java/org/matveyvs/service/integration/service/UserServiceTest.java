@@ -11,8 +11,6 @@ import org.matveyvs.service.UserService;
 import org.matveyvs.service.config.annotation.IT;
 import org.matveyvs.utils.RandomWellDataBaseCreator;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,7 +39,6 @@ class UserServiceTest {
                 "email@email.com",
                 "password service",
                 Role.USER,
-                Timestamp.valueOf(LocalDateTime.now()),
                 "Matvey",
                 "Test");
     }
@@ -53,7 +50,7 @@ class UserServiceTest {
 
         Optional<UserReadDto> byId = userService.findById(integer);
         assertTrue(byId.isPresent());
-        assertEquals(user.userName(), byId.get().userName());
+        assertEquals(user.username(), byId.get().username());
         userService.delete(integer);
     }
 
@@ -70,15 +67,14 @@ class UserServiceTest {
                 "test@email.com",
                 "update password service",
                 Role.USER,
-                Timestamp.valueOf(LocalDateTime.now()),
                 "update first name",
                 "update last name");
-        boolean update = userService.update(userUpdate);
-        assertTrue(update);
+        var update = userService.update(userUpdate);
+        assertTrue(update.isPresent());
 
         Optional<UserReadDto> updatedUser = userService.findById(integer);
         assertTrue(updatedUser.isPresent());
-        assertEquals(updatedUser.get().userName(), userUpdate.userName());
+        assertEquals(updatedUser.get().username(), userUpdate.username());
         userService.delete(integer);
     }
 
@@ -129,7 +125,7 @@ class UserServiceTest {
         Integer integer = userService.create(user);
         Optional<UserReadDto> byId = userService.findById(integer);
 
-        boolean ifExist = userService.checkIfExist(byId.get().userName(), byId.get().email());
+        boolean ifExist = userService.checkIfExist(byId.get().username(), byId.get().email());
         assertTrue(ifExist);
         userService.delete(integer);
     }

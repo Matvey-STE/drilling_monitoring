@@ -24,7 +24,6 @@ class WellDataServiceTest {
     private RandomWellDataBaseCreator randomWellDataBaseCreator;
     private WellDataService wellDataService;
 
-
     @BeforeEach
     void setUp() {
         if (wellDataService.findAll().isEmpty()) {
@@ -69,7 +68,6 @@ class WellDataServiceTest {
                 "update well");
         boolean update = wellDataService.update(entityToUpdate);
         assertTrue(update);
-
         var updatedEntity = wellDataService.findById(integer);
         assertTrue(updatedEntity.isPresent());
         updatedEntity.ifPresent(wellDataReadDto -> assertEquals(wellDataReadDto.companyName(), entityToUpdate.companyName()));
@@ -81,7 +79,6 @@ class WellDataServiceTest {
     void findById() {
         var well = getWellDataDto();
         Integer integer = wellDataService.create(well);
-
         Optional<WellDataReadDto> byId = wellDataService.findById(integer);
         assertTrue(byId.isPresent());
         boolean delete = wellDataService.delete(integer);
@@ -92,7 +89,6 @@ class WellDataServiceTest {
     void findAll() {
         var well = getWellDataDto();
         Integer integer = wellDataService.create(well);
-
         List<WellDataReadDto> all = wellDataService.findAll();
         assertFalse(all.isEmpty());
         boolean delete = wellDataService.delete(integer);
@@ -111,7 +107,6 @@ class WellDataServiceTest {
     void getWellDataPagesSortById() {
         var company = getWellDataDto();
         Integer integer = wellDataService.create(company);
-
         var sort = Sort.by("id");
         var pageRequest = PageRequest.of(0, 2, sort.descending());
         var wellDataPages = wellDataService.getWellDataPages(pageRequest);
@@ -119,9 +114,7 @@ class WellDataServiceTest {
         for (Map.Entry<Integer, List<WellDataReadDto>> entry : wellDataPages.entrySet()) {
             System.out.println("Page " + entry.getKey() + ": " + entry.getValue());
         }
-
         Optional<WellDataReadDto> byId = wellDataService.findById(integer);
-
         assertEquals(wellDataPages.get(1).get(0).id(), byId.get().id(),
                 "check first id element in list");
         wellDataService.delete(integer);
@@ -142,13 +135,10 @@ class WellDataServiceTest {
         for (Map.Entry<Integer, List<WellDataReadDto>> entry : wellDataPages.entrySet()) {
             System.out.println("Page " + entry.getKey() + ": " + entry.getValue());
         }
-
         Optional<WellDataReadDto> byId = wellDataService.findById(integer);
-
         List<WellDataReadDto> wellDataReadDtos = wellDataPages.get(1);
         assertEquals(wellDataReadDtos.get(1).companyName(), byId.get().companyName(),
                 "check first id element in list");
         wellDataService.delete(integer);
-
     }
 }

@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,10 +15,11 @@ import java.sql.Timestamp;
 public class User implements BaseEntity<Integer> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
+    @Column(name = "user_id", unique = true)
     private Integer id;
-    @Column(name = "username")
+    @Column(name = "username", unique = true)
     private String username;
+    @Column(unique = true)
     private String email;
     private String password;
     @Enumerated(EnumType.STRING)

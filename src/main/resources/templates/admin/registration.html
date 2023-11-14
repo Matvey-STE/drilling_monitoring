@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Creative - Bootstrap 3 Responsive Admin Template">
+    <meta name="author" content="GeeksLabs">
+    <meta name="keyword" content="Creative, Dashboard, Admin, Template, Theme, Bootstrap, Responsive, Retina, Minimal">
+    <link rel="shortcut icon" th:href="@{img/favicon.png}">
+
+    <title>Login Page 2 | Creative - Bootstrap 3 Responsive Admin Template</title>
+
+    <!-- Bootstrap CSS -->
+    <link th:href="@{css/bootstrap.min.css}" rel="stylesheet">
+    <!-- bootstrap theme -->
+    <link th:href="@{css/bootstrap-theme.css}" rel="stylesheet">
+    <!--external css-->
+    <!-- font icon -->
+    <link th:href="@{css/elegant-icons-style.css}" rel="stylesheet"/>
+    <link th:href="@{css/font-awesome.css}" rel="stylesheet"/>
+    <!-- Custom styles -->
+    <link th:href="@{css/style.css}" rel="stylesheet">
+    <link th:href="@{css/style-responsive.css}" rel="stylesheet"/>
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 -->
+    <!--[if lt IE 9]>
+    <script th:src="@{js/html5shiv.js}"></script>
+    <script th:src="@{js/respond.min.js}"></script>
+    <![endif]-->
+
+    <!-- =======================================================
+      Theme Name: NiceAdmin
+      Theme URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
+      Author: BootstrapMade
+      Author URL: https://bootstrapmade.com
+    ======================================================= -->
+</head>
+
+<body class="login-img3-body">
+
+<div class="container">
+
+    <form class="login-form" th:action="@{/registration}" th:method="post">
+        <div class="login-wrap">
+            <p class="login-img"><i class="icon_lock_alt"></i></p>
+            <div class="row">
+                <div class="col-lg-12" th:if="${errors}">
+                    <p style="color: red" th:each="error : ${errors}" th:text="${error.defaultMessage}">Error
+                        message</p>
+                </div>
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon_profile"></i></span>
+                <label for="username"></label><input type="text" id="username" name="username"
+                                                     th:value="${user.username()}"
+                                                     class="form-control" placeholder="Username" required>
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon_mail_alt"></i></span>
+                <label for="email"></label><input type="email" id="email" name="email" th:value="${user.email()}"
+                                                  class="form-control" placeholder="Email" required>
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon_tool"></i></span>
+                <label for="password"></label><input type="password" id="password" name="password"
+                                                     class="form-control" placeholder="Password" required>
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon_profile"></i></span>
+                <select name="role" class="form-control">
+                    <option th:each="role : ${roles}"
+                            th:value="${role}"
+                            th:selected="${role == user.role()}"
+                            th:text="${role}">Choose a Role
+                    </option>
+                </select>
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon_profile"></i></span>
+                <label for="firstName"></label><input type="text" id="firstName" name="firstName"
+                                                      th:value="${user.firstName()}" class="form-control"
+                                                      placeholder="First Name" required>
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon"><i class="icon_profile"></i></span>
+                <label for="lastName"></label><input type="text" id="lastName" name="lastName"
+                                                     th:value="${user.lastName()}" class="form-control"
+                                                     placeholder="Last Name" required>
+            </div>
+            <div>
+                <button class="btn btn-primary btn-lg btn-block" type="submit">Register</button>
+            </div>
+        </div>
+        <div class="login-wrap">
+            <section>
+                <a th:href="@{/login}">
+                    <button class="btn btn-info btn-lg btn-block" type="button">Login</button>
+                </a>
+            </section>
+        </div>
+    </form>
+    <div class="text-center">
+        <div class="credits">
+            <!--
+              All the links in the footer should remain intact.
+              You can delete the links only if you purchased the pro version.
+              Licensing information: https://bootstrapmade.com/license/
+              Purchase the pro version form: https://bootstrapmade.com/buy/?theme=NiceAdmin
+            -->
+            Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+        </div>
+    </div>
+</div>
+
+
+</body>
+
+</html>

@@ -47,20 +47,25 @@
             <p class="login-img"><i class="icon_lock_alt"></i></p>
             <div class="input-group">
                 <span class="input-group-addon"><i class="icon_profile"></i></span>
-                <label for="username"></label><input type="text" id="username" name="username" th:value="${username}" class="form-control" placeholder="Username or Mail" autofocus required>
+                <label for="username"></label><input type="text" id="username" name="username" th:value="${username}"
+                                                     class="form-control" placeholder="Username or Mail" autofocus
+                                                     required>
             </div>
             <div class="input-group">
                 <span class="input-group-addon"><i class="icon_key_alt"></i></span>
-                <label for="password"></label><input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+                <label for="password"></label><input type="password" id="password" name="password" class="form-control"
+                                                     placeholder="Password" required>
             </div>
             <label class="error" th:if="${loginMessage}">
                 <comment th:text="${loginMessage}">Error message</comment>
             </label>
             <label class="checkbox">
-                                <input type="checkbox" value="remember-me"> Remember me
+                <input type="checkbox" value="remember-me"> Remember me
                 <span class="pull-right"> <a href="#"> Forgot Password?</a></span>
             </label>
             <button class="btn btn-primary btn-lg btn-block" type="submit">Login</button>
+        </div>
+        <div class="login-wrap">
             <section>
                 <a th:href="@{/registration}">
                     <button class="btn btn-info btn-lg btn-block" type="button">Signup</button>

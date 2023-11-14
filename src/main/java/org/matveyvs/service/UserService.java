@@ -1,7 +1,5 @@
 package org.matveyvs.service;
 
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Validator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.matveyvs.mapper.UserMapper;
@@ -29,18 +27,12 @@ import java.util.regex.Pattern;
 public class UserService {
     private UserRepository userRepository;
     private UserMapper userMapper;
-    private Validator validator;
 
     @Transactional
     public Integer create(UserCreateDto userCreateDto) {
-        var validate = validator.validate(userCreateDto);
-        if (!validate.isEmpty()) {
-            throw new ConstraintViolationException(validate);
-        }
         var entity = userMapper.map(userCreateDto);
         log.info("Create method: " + entity);
-        var id = userRepository.save(entity);
-        return id.getId();
+        return userRepository.save(entity).getId();
     }
 
     @Transactional
