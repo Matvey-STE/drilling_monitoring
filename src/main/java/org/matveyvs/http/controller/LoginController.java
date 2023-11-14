@@ -5,16 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.matveyvs.dto.UserReadDto;
 import org.matveyvs.service.UserService;
-import org.matveyvs.utils.LinkCreatorUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.matveyvs.utils.UrlPath.LOGIN;
@@ -28,7 +23,7 @@ public class LoginController {
     @GetMapping(LOGIN)
     public String showLoginPage() {
         log.info("User visited /login page");
-        return "user/login";
+        return "admin/login";
     }
 
     @PostMapping(LOGIN)
@@ -42,7 +37,7 @@ public class LoginController {
             model.addAttribute("user", login);
             request.getSession().setAttribute("user", login);
             log.info("User with username " + login.get().username() + "successfully login");
-            return "redirect:/wells";
+            return "redirect:/users";
         } else {
             String errorMessage = "Incorrect username, email, or password. Please try again.";
             redirectAttributes.addFlashAttribute("username", email);
