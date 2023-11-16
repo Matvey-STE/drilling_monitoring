@@ -25,7 +25,7 @@ public class WellDataController {
     private WellDataService wellDataService;
 
     @GetMapping(WELLS)
-    public String showWellsPage(Model model) {
+    public String showWellList(Model model) {
         List<WellDataReadDto> wellData = wellDataService.findAll();
         model.addAttribute("welldata", wellData);
         return "/monitoring/wells";

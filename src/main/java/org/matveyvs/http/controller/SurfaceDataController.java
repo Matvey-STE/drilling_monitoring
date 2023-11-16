@@ -17,10 +17,10 @@ public class SurfaceDataController {
     private WellDataService wellDataService;
 
     @GetMapping("/wells/{id}/surface")
-    public String showSurfaceData(Model model,
+    public String showSurfaceDataList(Model model,
                                   @PathVariable("id") Integer id) {
         model.addAttribute("surfaceData", surfaceDataService.findAllByWellId(id));
         model.addAttribute("well", wellDataService.findById(id));
-        return "monitoring/surfaceDataList";
+        return "/monitoring/surfaceDataList";
     }
 }

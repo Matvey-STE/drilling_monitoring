@@ -17,11 +17,11 @@ public class DirectionalController {
     private WellDataService wellDataService;
 
     @GetMapping("/wells/{wellId}/downhole/{downholeId}/directional")
-    public String showSurfaceData(Model model,
+    public String showDirectionalList(Model model,
                                   @PathVariable("wellId") Integer wellId,
                                   @PathVariable("downholeId") Integer dowholeId) {
         model.addAttribute("directional", directionalService.findAllByDownholeId(dowholeId));
         model.addAttribute("well", wellDataService.findById(wellId));
-        return "monitoring/directionalList";
+        return "/monitoring/directionalList";
     }
 }

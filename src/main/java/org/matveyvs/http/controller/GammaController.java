@@ -17,11 +17,11 @@ public class GammaController {
     private WellDataService wellDataService;
 
     @GetMapping("/wells/{wellId}/downhole/{downholeId}/gamma")
-    public String showSurfaceData(Model model,
+    public String showGammaList(Model model,
                                   @PathVariable("wellId") Integer wellId,
                                   @PathVariable("downholeId") Integer dowholeId) {
         model.addAttribute("gamma", gammaService.findAllByDownholeId(dowholeId));
         model.addAttribute("well", wellDataService.findById(wellId));
-        return "monitoring/gammaList";
+        return "/monitoring/gammaList";
     }
 }

@@ -17,10 +17,10 @@ public class DownholeDataController {
     private DownholeDataService downholeDataService;
 
     @GetMapping("/wells/{id}/downhole")
-    public String showSurfaceData(Model model,
+    public String showDownholeDataList(Model model,
                                   @PathVariable("id") Integer id) {
         model.addAttribute("downhole", downholeDataService.findAllByWellId(id));
         model.addAttribute("well", wellDataService.findById(id));
-        return "monitoring/downholeData";
+        return "/monitoring/downholeData";
     }
 }
