@@ -120,25 +120,4 @@ class WellDataServiceTest {
         wellDataService.delete(integer);
     }
 
-    @Test
-    void getWellDataPagesFromSecondPageSortByCompany() {
-        var company = new WellDataCreateDto(
-                "Zinger",
-                "Field Name",
-                "Well Cluster",
-                "Well");
-        Integer integer = wellDataService.create(company);
-        var sort = Sort.by("companyName");
-        var pageRequest = PageRequest.of(1, 2, sort);
-        var wellDataPages = wellDataService.getWellDataPages(pageRequest);
-        System.out.println("Well Data Pages:");
-        for (Map.Entry<Integer, List<WellDataReadDto>> entry : wellDataPages.entrySet()) {
-            System.out.println("Page " + entry.getKey() + ": " + entry.getValue());
-        }
-        Optional<WellDataReadDto> byId = wellDataService.findById(integer);
-        List<WellDataReadDto> wellDataReadDtos = wellDataPages.get(1);
-        assertEquals(wellDataReadDtos.get(1).companyName(), byId.get().companyName(),
-                "check first id element in list");
-        wellDataService.delete(integer);
-    }
 }

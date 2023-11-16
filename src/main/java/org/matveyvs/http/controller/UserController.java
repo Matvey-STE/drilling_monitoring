@@ -39,7 +39,7 @@ public class UserController {
                                  @PathParam("sortDir") String sortDir,
                                  @PathParam("keyword") String keyword) {
         var page = userService
-                .findPageWithSort(sortField, sortDir, currentPage, keyword);
+                .findPageWithSortAndFilter(sortField, sortDir, currentPage, keyword);
         var userReadDtos = page.getContent();
         int totalPages = page.getTotalPages();
         long totalItems = page.getTotalElements();
@@ -74,10 +74,10 @@ public class UserController {
             redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
             return "redirect:/userAdd";
         }
-        try{
+        try {
             var id = userService.create(userCreateDto);
             log.info("User" + userCreateDto + " with id: " + id + " was created");
-        } catch (Exception exception){
+        } catch (Exception exception) {
             if (exception.getMessage().contains("unique constraint")) {
                 String message = "Username or email are already exists";
                 ObjectError error = new ObjectError("exists.constraint", message);
@@ -111,7 +111,7 @@ public class UserController {
         return "redirect:/users";
     }
 
-    @GetMapping("userEdit/{id}")
+    @GetMapping("/userEdit/{id}")
     public String editById(@PathVariable Integer id, Model model) {
         return userService.findById(id).map(user -> {
                     model.addAttribute("user", user);
@@ -121,7 +121,7 @@ public class UserController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping("userDetails/{id}")
+    @GetMapping("/userDetails/{id}")
     public String detailsById(@PathVariable Integer id, Model model) {
         return userService.findById(id).map(user -> {
                     model.addAttribute("user", user);

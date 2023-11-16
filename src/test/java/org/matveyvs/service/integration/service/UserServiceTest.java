@@ -10,6 +10,7 @@ import org.matveyvs.entity.Role;
 import org.matveyvs.service.UserService;
 import org.matveyvs.service.config.annotation.IT;
 import org.matveyvs.utils.RandomWellDataBaseCreator;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.Optional;
@@ -79,6 +80,25 @@ class UserServiceTest {
     }
 
     @Test
+    void findPageWithSortAndFilter() {
+        var user = new UserCreateDto(
+                "username service",
+                "zmail@email.com",
+                "password service",
+                Role.USER,
+                "Matvey",
+                "Test");
+        Integer integer = userService.create(user);
+        Optional<UserReadDto> byId = userService.findById(integer);
+        assertTrue(byId.isPresent());
+        Page<UserReadDto> pageWithSortAndFilter = userService.findPageWithSortAndFilter("email", "DESC", 1, "USER");
+        List<UserReadDto> content = pageWithSortAndFilter.getContent();
+        assertFalse(content.isEmpty());
+        assertEquals(content.get(0).id(), integer);
+        userService.delete(integer);
+    }
+
+    @Test
     void findById() {
         var user = getUser();
         Integer integer = userService.create(user);
@@ -113,7 +133,6 @@ class UserServiceTest {
         var user = getUser();
         Integer integer = userService.create(user);
         Optional<UserReadDto> byId = userService.findById(integer);
-
         Optional<UserReadDto> login = userService.login(byId.get().email(), byId.get().password());
         assertTrue(login.isPresent());
         userService.delete(integer);

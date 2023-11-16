@@ -4,9 +4,11 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import lombok.experimental.FieldNameConstants;
 import org.matveyvs.entity.Role;
 
 @Valid
+@FieldNameConstants
 public record UserCreateDto(
         @NotNull
         @NotEmpty(message = "The field Username shouldn't be empty")

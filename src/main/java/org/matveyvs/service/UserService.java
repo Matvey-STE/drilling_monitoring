@@ -57,10 +57,10 @@ public class UserService {
         return userRepository.findAll().stream().map(userMapper::map).toList();
     }
 
-    public Page<UserReadDto> findPageWithSort(String field,
-                                              String direction,
-                                              int pageNumber,
-                                              String filter) {
+    public Page<UserReadDto> findPageWithSortAndFilter(String field,
+                                                       String direction,
+                                                       int pageNumber,
+                                                       String filter) {
         Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name()) ?
                 Sort.by(field).ascending() : Sort.by(field).descending();
         Pageable pageable = PageRequest.of(pageNumber - 1, 3, sort);

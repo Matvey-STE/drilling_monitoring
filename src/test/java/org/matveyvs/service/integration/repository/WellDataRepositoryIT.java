@@ -29,10 +29,12 @@ class WellDataRepositoryIT {
     void create() {
         WellData wellData = WellData.builder()
                 .fieldName("Field Name")
+                .companyName("Test")
                 .well("Well")
                 .build();
         WellData save = wellDataRepository.save(wellData);
         assertEquals("create well data repository", save.getFieldName(), wellData.getFieldName());
+
     }
 
     @Test

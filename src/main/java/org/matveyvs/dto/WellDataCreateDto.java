@@ -1,8 +1,12 @@
 package org.matveyvs.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import lombok.experimental.FieldNameConstants;
 
+@Valid
+@FieldNameConstants
 public record WellDataCreateDto(
         @NotNull
         @NotEmpty(message = "Company name shouldn't be empty")

@@ -28,11 +28,11 @@ public class WellDataController {
     public String showWellsPage(Model model) {
         List<WellDataReadDto> wellData = wellDataService.findAll();
         model.addAttribute("welldata", wellData);
-        return "monitoring/wells";
+        return "/monitoring/wells";
     }
 
     @GetMapping("/wellAdd")
-    public String createUser(Model model, @ModelAttribute("well") WellDataCreateDto wellData) {
+    public String createWell(Model model, @ModelAttribute("well") WellDataCreateDto wellData) {
         model.addAttribute("well", wellData);
         return "/monitoring/wellAdd";
     }
@@ -65,7 +65,7 @@ public class WellDataController {
                          RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
-            return "redirect:/userEdit/{id}";
+            return "redirect:/wellEdit/{id}";
         }
         return wellDataService.update(dataReadDto)
                 .map(it -> "redirect:/wellEdit/{id}")

@@ -11,8 +11,4 @@ spring:
     properties:
       hibernate:
         format_sql: true
-    open-in-view: false
-#  mvc:
-#    view:
-#      prefix: /WEB-INF/jsp/
-#      suffix: .jsp
+    open-in-view: true
