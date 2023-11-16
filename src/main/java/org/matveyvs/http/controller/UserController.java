@@ -7,11 +7,11 @@ import org.matveyvs.dto.UserCreateDto;
 import org.matveyvs.dto.UserReadDto;
 import org.matveyvs.entity.Role;
 import org.matveyvs.service.UserService;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,8 +25,6 @@ public class UserController {
 
     @GetMapping("/users")
     public String getAllPages(Model model,
-                              @PathParam("sortField") String sortField,
-                              @PathParam("sortDir") String sortDir,
                               @PathParam("keyword") String keyword) {
         if (keyword == null) {
             keyword = "";
@@ -60,6 +58,13 @@ public class UserController {
         return "/admin/userList";
     }
 
+    @GetMapping("/userAdd")
+    public String createUser(Model model, @ModelAttribute("user") UserCreateDto userCreateDto) {
+        model.addAttribute("roles", Role.values());
+        model.addAttribute("user", userCreateDto);
+        return "/admin/userAdd";
+    }
+
     @PostMapping("/userAdd")
     public String create(@ModelAttribute @Validated UserCreateDto userCreateDto,
                          BindingResult bindingResult,
@@ -69,15 +74,20 @@ public class UserController {
             redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
             return "redirect:/userAdd";
         }
-        userService.create(userCreateDto);
+        try{
+            var id = userService.create(userCreateDto);
+            log.info("User" + userCreateDto + " with id: " + id + " was created");
+        } catch (Exception exception){
+            if (exception.getMessage().contains("unique constraint")) {
+                String message = "Username or email are already exists";
+                ObjectError error = new ObjectError("exists.constraint", message);
+                bindingResult.addError(error);
+            }
+            redirectAttributes.addFlashAttribute("user", userCreateDto);
+            redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
+            return "redirect:/userAdd";
+        }
         return "redirect:/users";
-    }
-
-    @GetMapping("/userAdd")
-    public String createUser(Model model, @ModelAttribute("user") UserCreateDto userCreateDto) {
-        model.addAttribute("roles", Role.values());
-        model.addAttribute("user", userCreateDto);
-        return "/admin/userAdd";
     }
 
     @PostMapping(value = "/users/{id}/update")

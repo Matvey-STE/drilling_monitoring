@@ -1,6 +1,5 @@
 //package org.matveyvs.filter;
 //
-//
 //import jakarta.servlet.*;
 //import jakarta.servlet.http.HttpServletRequest;
 //import jakarta.servlet.http.HttpServletResponse;
@@ -12,8 +11,8 @@
 //
 //import static org.matveyvs.utils.UrlPath.LOGIN;
 //import static org.matveyvs.utils.UrlPath.REGISTRATION;
-//@Component
 //@Log4j2
+//@Component
 //public class AuthorisationFilter implements Filter {
 //    private static final Set<String> PUBLIC_PATH = Set.of(LOGIN, REGISTRATION);
 //    @Override

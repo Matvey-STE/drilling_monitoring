@@ -27,7 +27,7 @@ public class DownholeData implements BaseEntity<Integer> {
     @OneToMany(mappedBy = "downholeData", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Directional> directionalList = new HashSet<>();
     @Builder.Default
-    @OneToMany(mappedBy = "downholeData", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "downholeData", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Gamma> gammaList = new HashSet<>();
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "welldata_id")

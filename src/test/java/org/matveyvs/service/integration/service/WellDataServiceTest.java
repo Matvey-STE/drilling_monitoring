@@ -66,8 +66,8 @@ class WellDataServiceTest {
                 "update field name",
                 "update well cluster",
                 "update well");
-        boolean update = wellDataService.update(entityToUpdate);
-        assertTrue(update);
+        var update = wellDataService.update(entityToUpdate);
+        assertTrue(update.isPresent());
         var updatedEntity = wellDataService.findById(integer);
         assertTrue(updatedEntity.isPresent());
         updatedEntity.ifPresent(wellDataReadDto -> assertEquals(wellDataReadDto.companyName(), entityToUpdate.companyName()));

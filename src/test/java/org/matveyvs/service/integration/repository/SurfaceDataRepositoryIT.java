@@ -23,7 +23,9 @@ class SurfaceDataRepositoryIT {
 
     @BeforeEach
     void setUp() {
-        randomWellDataBaseCreator.createRandomDataForTests();
+        if(surfaceDataRepository.findAll().isEmpty()){
+            randomWellDataBaseCreator.createRandomDataForTests();
+        }
     }
 
     @Test

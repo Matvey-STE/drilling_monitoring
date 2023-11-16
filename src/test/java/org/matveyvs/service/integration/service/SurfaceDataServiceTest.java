@@ -39,7 +39,6 @@ class SurfaceDataServiceTest {
         if (wellDataService.findAll().isEmpty()) {
             randomWellDataBaseCreator.createRandomDataForTests();
         }
-        randomWellDataBaseCreator.createRandomDataForTests();
         Integer integer = wellDataService.create(getWellDataDto());
         wellDataReadDto = wellDataService.findById(integer).orElse(null);
     }

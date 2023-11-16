@@ -31,15 +31,15 @@ public class WellDataService {
         return wellDataRepository.save(entity).getId();
     }
     @Transactional
-    public boolean update(WellDataReadDto wellDataReadDto) {
+    public Optional<WellDataReadDto> update(WellDataReadDto wellDataReadDto) {
         var optional = wellDataRepository.findById(wellDataReadDto.id());
         log.info("Update method: " + optional);
         if (optional.isPresent()) {
             WellData entity = wellDataMapper.mapFull(wellDataReadDto);
-            wellDataRepository.save(entity);
-            return true;
+            WellData save = wellDataRepository.save(entity);
+            return Optional.ofNullable(wellDataMapper.map(save));
         } else {
-            return false;
+            return Optional.empty();
         }
     }
 

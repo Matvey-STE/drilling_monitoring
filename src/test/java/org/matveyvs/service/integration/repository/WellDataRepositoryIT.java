@@ -20,7 +20,9 @@ class WellDataRepositoryIT {
 
     @BeforeEach
     void setUp() {
-        randomWellDataBaseCreator.createRandomDataForTests();
+        if(wellDataRepository.findAll().isEmpty()){
+            randomWellDataBaseCreator.createRandomDataForTests();
+        }
     }
 
     @Test

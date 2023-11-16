@@ -35,11 +35,11 @@ public class WellData implements BaseEntity<Integer>, Serializable {
     private String wellCluster;
     private String well;
     @Builder.Default
-    @OneToMany(mappedBy = "wellData",fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "wellData",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     //set to prevent MultipleBagFetchException
     private Set<SurfaceData> surfaceDataList = new HashSet<>();
     @Builder.Default
-    @OneToMany(mappedBy = "wellData",fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "wellData",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<DownholeData> downholeDataList = new ArrayList<>();
 
     public void addSurfaceData(SurfaceData surfaceData){

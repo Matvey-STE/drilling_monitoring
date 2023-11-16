@@ -20,7 +20,9 @@ class GammaRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        randomWellDataBaseCreator.createRandomDataForTests();
+        if(gammaRepository.findAll().isEmpty()){
+            randomWellDataBaseCreator.createRandomDataForTests();
+        }
     }
 
     @Test

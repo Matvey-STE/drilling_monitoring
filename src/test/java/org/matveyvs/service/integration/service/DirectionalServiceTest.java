@@ -40,7 +40,6 @@ class DirectionalServiceTest {
         if (wellDataService.findAll().isEmpty()) {
             randomWellDataBaseCreator.createRandomDataForTests();
         }
-        randomWellDataBaseCreator.createRandomDataForTests();
         var wellId = wellDataService.create(getWellDataDto());
         wellDataReadDto = wellDataService.findById(wellId).orElse(null);
         var downholeId = downholeDataService.create(getDownholeDataDto());

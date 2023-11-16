@@ -8,7 +8,6 @@ import org.matveyvs.repository.UserRepository;
 import org.matveyvs.service.config.annotation.IT;
 import org.matveyvs.utils.RandomWellDataBaseCreator;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
@@ -22,8 +21,7 @@ class UserRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        List<User> all = userRepository.findAll();
-        if (all.isEmpty()) {
+        if (userRepository.findAll().isEmpty()) {
             randomWellDataBaseCreator.createRandomDataForTests();
         }
     }
