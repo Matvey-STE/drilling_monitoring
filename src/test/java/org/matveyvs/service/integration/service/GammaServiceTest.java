@@ -1,5 +1,6 @@
 package org.matveyvs.service.integration.service;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @IT
+@RequiredArgsConstructor
 class GammaServiceTest {
     private final RandomWellDataBaseCreator randomWellDataBaseCreator;
     private final GammaService gammaService;
@@ -24,16 +26,6 @@ class GammaServiceTest {
     private final DownholeDataService downholeDataService;
     private WellDataReadDto wellDataReadDto;
     private DownholeDataReadDto downholeDataReadDto;
-
-    public GammaServiceTest(RandomWellDataBaseCreator randomWellDataBaseCreator,
-                            GammaService gammaService,
-                            WellDataService wellDataService,
-                            DownholeDataService downholeDataService) {
-        this.randomWellDataBaseCreator = randomWellDataBaseCreator;
-        this.gammaService = gammaService;
-        this.wellDataService = wellDataService;
-        this.downholeDataService = downholeDataService;
-    }
 
     @BeforeEach
     void setUp() {

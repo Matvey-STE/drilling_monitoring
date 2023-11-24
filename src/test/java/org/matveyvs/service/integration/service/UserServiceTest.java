@@ -1,6 +1,6 @@
 package org.matveyvs.service.integration.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,10 +18,10 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @IT
-@AllArgsConstructor
+@RequiredArgsConstructor
 class UserServiceTest {
-    private RandomWellDataBaseCreator randomWellDataBaseCreator;
-    private UserService userService;
+    private final RandomWellDataBaseCreator randomWellDataBaseCreator;
+    private final UserService userService;
 
     @BeforeEach
     void setUp() {

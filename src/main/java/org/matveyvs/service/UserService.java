@@ -1,6 +1,6 @@
 package org.matveyvs.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.matveyvs.mapper.UserMapper;
 import org.matveyvs.dto.UserCreateDto;
@@ -21,12 +21,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-@AllArgsConstructor
-@Transactional(readOnly = true)
 @Log4j2
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class UserService {
-    private UserRepository userRepository;
-    private UserMapper userMapper;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @Transactional
     public Integer create(UserCreateDto userCreateDto) {
@@ -59,11 +59,15 @@ public class UserService {
 
     public Page<UserReadDto> findPageWithSortAndFilter(String field,
                                                        String direction,
-                                                       int pageNumber,
+                                                       Integer pageNumber,
                                                        String filter) {
         Sort sort = direction.equalsIgnoreCase(Sort.Direction.ASC.name()) ?
                 Sort.by(field).ascending() : Sort.by(field).descending();
-        Pageable pageable = PageRequest.of(pageNumber - 1, 3, sort);
+        pageNumber = (pageNumber == null) ? 1 : pageNumber;
+        Pageable pageable = PageRequest.of(
+                pageNumber - 1,
+                3,
+                sort);
         if (filter != null) {
             return userRepository.findAllBy(filter, pageable).map(userMapper::map);
         }

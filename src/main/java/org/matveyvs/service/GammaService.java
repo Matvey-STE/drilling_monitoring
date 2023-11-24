@@ -1,6 +1,6 @@
 package org.matveyvs.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.matveyvs.dto.GammaCreateDto;
 import org.matveyvs.dto.GammaReadDto;
@@ -14,18 +14,20 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@AllArgsConstructor
-@Transactional(readOnly = true)
 @Log4j2
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class GammaService {
-    private GammaRepository gammaRepository;
-    private GammaMapperImpl gammaMapper;
+    private final GammaRepository gammaRepository;
+    private final GammaMapperImpl gammaMapper;
+
     @Transactional
     public Integer create(GammaCreateDto gammaCreateDto) {
         var entity = gammaMapper.map(gammaCreateDto);
         log.info("Create method: " + entity);
         return gammaRepository.save(entity).getId();
     }
+
     @Transactional
     public boolean update(GammaReadDto gammaReadDto) {
         var optional = gammaRepository.findById(gammaReadDto.id());
@@ -48,6 +50,7 @@ public class GammaService {
         log.info("Find all method");
         return gammaRepository.findAll().stream().map(gammaMapper::map).toList();
     }
+
     @Transactional
     public boolean delete(Integer id) {
         var maybeUser = gammaRepository.findById(id);

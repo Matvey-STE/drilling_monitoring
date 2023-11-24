@@ -112,7 +112,8 @@ public class UserController {
     }
 
     @GetMapping("/userEdit/{id}")
-    public String editById(@PathVariable Integer id, Model model) {
+    public String editById(Model model,
+                           @PathVariable("id") int id) {
         return userService.findById(id).map(user -> {
                     model.addAttribute("user", user);
                     model.addAttribute("roles", Role.values());
@@ -122,7 +123,7 @@ public class UserController {
     }
 
     @GetMapping("/userDetails/{id}")
-    public String detailsById(@PathVariable Integer id, Model model) {
+    public String detailsById(Model model, @PathVariable int id) {
         return userService.findById(id).map(user -> {
                     model.addAttribute("user", user);
                     model.addAttribute("roles", Role.values());

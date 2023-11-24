@@ -3,7 +3,6 @@ package org.matveyvs.service.config.annotation;
 import org.matveyvs.ApplicationLoader;
 import org.matveyvs.service.config.TestApplicationLoader;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +16,5 @@ import java.lang.annotation.Target;
 @ActiveProfiles("test")
 @SpringBootTest(classes = {ApplicationLoader.class, TestApplicationLoader.class})
 @Transactional
-@Rollback(value = false)
 public @interface IT {
 }

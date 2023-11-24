@@ -1,6 +1,6 @@
 package org.matveyvs.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.matveyvs.dto.WellDataCreateDto;
 import org.matveyvs.dto.WellDataReadDto;
@@ -18,18 +18,20 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
-@AllArgsConstructor
-@Transactional(readOnly = true)
 @Log4j2
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class WellDataService {
-    private WellDataRepository wellDataRepository;
-    private WellDataMapperImpl wellDataMapper;
+    private final WellDataRepository wellDataRepository;
+    private final WellDataMapperImpl wellDataMapper;
+
     @Transactional
     public Integer create(WellDataCreateDto wellDataCreateDto) {
         var entity = wellDataMapper.map(wellDataCreateDto);
         log.info("Create method: " + entity);
         return wellDataRepository.save(entity).getId();
     }
+
     @Transactional
     public Optional<WellDataReadDto> update(WellDataReadDto wellDataReadDto) {
         var optional = wellDataRepository.findById(wellDataReadDto.id());
@@ -52,6 +54,7 @@ public class WellDataService {
         log.info("Find all method");
         return wellDataRepository.findAll().stream().map(wellDataMapper::map).toList();
     }
+
     @Transactional
     public boolean delete(Integer id) {
         var maybeUser = wellDataRepository.findById(id);

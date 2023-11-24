@@ -3,6 +3,7 @@ package org.matveyvs.http.controller;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.matveyvs.dto.WellDataCreateDto;
 import org.matveyvs.service.WellDataService;
 import org.matveyvs.service.config.annotation.IT;
 import org.matveyvs.utils.RandomWellDataBaseCreator;
@@ -23,12 +24,23 @@ class WellDataControllerTest {
     private final RandomWellDataBaseCreator randomWellDataBaseCreator;
     private final WellDataService wellDataService;
     private final MockMvc mockMvc;
+    private static Integer wellDataId;
 
     @BeforeEach
     void setUp() {
         if (wellDataService.findAll().isEmpty()) {
             randomWellDataBaseCreator.createRandomDataForTests();
         }
+        wellDataId = wellDataService.create(getWellDataDto());
+
+    }
+
+    private WellDataCreateDto getWellDataDto() {
+        return new WellDataCreateDto(
+                "Company Name",
+                "Field Name",
+                "Well Cluster",
+                "Well");
     }
 
     @Test
@@ -63,27 +75,37 @@ class WellDataControllerTest {
     }
 
     @Test
-    void detailsOrEditById() throws Exception {
+    void detailsByIdSuccess() throws Exception {
+        mockMvc.perform(get("/wellDetails/{successUserId}", wellDataId))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(view().name("/monitoring/wellDetails"))
+                .andExpect(model().attributeExists("well"));
+    }
+
+    @Test
+    void editByIdSuccess() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/wellEdit/{successUserId}", wellDataId))
+                .andExpect(model().attributeExists("well"))
+                .andExpect(view().name("/monitoring/wellEdit"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void editByIdFail() throws Exception {
         var failUserId = -1;
-        var successUserId = 1;
         mockMvc.perform(get("/wellEdit/{id}", failUserId))
                 .andExpectAll(
                         status().is4xxClientError()
                 );
+    }
 
-        mockMvc.perform(get("/wellEdit/{id}", successUserId))
-                .andExpect(model().attributeExists("well"))
-                .andExpect(view().name("/monitoring/wellEdit"))
-                .andExpect(status().isOk());
+    @Test
+    void detailsByIdFail() throws Exception {
+        var failUserId = -1;
         mockMvc.perform(get("/wellDetails/{id}", failUserId))
                 .andExpectAll(
                         status().is4xxClientError()
                 );
-
-        mockMvc.perform(get("/wellDetails/{id}", successUserId))
-                .andExpect(model().attributeExists("well"))
-                .andExpect(view().name("/monitoring/wellDetails"))
-                .andExpect(status().isOk());
     }
 
     @Test
@@ -99,18 +121,21 @@ class WellDataControllerTest {
     }
 
     @Test
-    void delete() throws Exception {
+    void deleteSuccess() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/wells/{id}/delete", wellDataId))
+                .andExpectAll(
+                        status().is3xxRedirection(),
+                        redirectedUrl("/wells")
+                );
+    }
+
+    @Test
+    void deleteFail() throws Exception {
         var failUserId = -1;
-        var successUserId = 1;
         mockMvc.perform(MockMvcRequestBuilders.delete("/wells/{id}/delete", failUserId))
                 .andExpectAll(
                         status().is4xxClientError()
                 );
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/wells/{id}/delete", successUserId))
-                .andExpectAll(
-                        status().is3xxRedirection(),
-                        redirectedUrl("/wells")
-                );
     }
 }

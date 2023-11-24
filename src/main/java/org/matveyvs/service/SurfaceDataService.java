@@ -1,6 +1,6 @@
 package org.matveyvs.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.matveyvs.dto.SurfaceDataCreateDto;
 import org.matveyvs.dto.SurfaceDataReadDto;
@@ -14,18 +14,20 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@AllArgsConstructor
-@Transactional(readOnly = true)
 @Log4j2
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class SurfaceDataService {
-    private SurfaceDataRepository surfaceDataRepository;
-    private SurfaceDataMapperImpl surfaceDataMapper;
+    private final SurfaceDataRepository surfaceDataRepository;
+    private final SurfaceDataMapperImpl surfaceDataMapper;
+
     @Transactional
     public Integer create(SurfaceDataCreateDto surfaceDataCreateDto) {
         var entity = surfaceDataMapper.map(surfaceDataCreateDto);
         log.info("Create method: " + entity);
         return surfaceDataRepository.save(entity).getId();
     }
+
     @Transactional
     public boolean update(SurfaceDataReadDto surfaceDataReadDto) {
         var optional = surfaceDataRepository.findById(surfaceDataReadDto.id());
@@ -48,6 +50,7 @@ public class SurfaceDataService {
         log.info("Find all method");
         return surfaceDataRepository.findAll().stream().map(surfaceDataMapper::map).toList();
     }
+
     @Transactional
     public boolean delete(Integer id) {
         var maybeUser = surfaceDataRepository.findById(id);

@@ -59,6 +59,15 @@ public class WellDataController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
+    @GetMapping("/wellDetails/{id}")
+    public String detailsById(@PathVariable Integer id, Model model) {
+        return wellDataService.findById(id).map(wellData -> {
+                    model.addAttribute("well", wellData);
+                    return "/monitoring/wellDetails";
+                })
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
     @PostMapping(value = "/wells/{id}/update")
     public String update(@ModelAttribute @Validated WellDataReadDto dataReadDto,
                          BindingResult bindingResult,
@@ -69,15 +78,6 @@ public class WellDataController {
         }
         return wellDataService.update(dataReadDto)
                 .map(it -> "redirect:/wellEdit/{id}")
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-    }
-
-    @GetMapping("/wellDetails/{id}")
-    public String detailsById(@PathVariable Integer id, Model model) {
-        return wellDataService.findById(id).map(wellData -> {
-                    model.addAttribute("well", wellData);
-                    return "/monitoring/wellDetails";
-                })
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 

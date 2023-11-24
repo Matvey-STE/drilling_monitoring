@@ -1,5 +1,6 @@
 package org.matveyvs.service.integration.service;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,19 +21,12 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @IT
+@RequiredArgsConstructor
 class SurfaceDataServiceTest {
     private final RandomWellDataBaseCreator randomWellDataBaseCreator;
     private final SurfaceDataService surfaceDataService;
     private final WellDataService wellDataService;
     private WellDataReadDto wellDataReadDto;
-
-    public SurfaceDataServiceTest(RandomWellDataBaseCreator randomWellDataBaseCreator,
-                                  SurfaceDataService surfaceDataService,
-                                  WellDataService wellDataService) {
-        this.randomWellDataBaseCreator = randomWellDataBaseCreator;
-        this.surfaceDataService = surfaceDataService;
-        this.wellDataService = wellDataService;
-    }
 
     @BeforeEach
     void setUp() {

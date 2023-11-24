@@ -1,6 +1,6 @@
 package org.matveyvs.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.matveyvs.dto.DownholeDataCreateDto;
 import org.matveyvs.dto.DownholeDataReadDto;
@@ -14,18 +14,20 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@AllArgsConstructor
-@Transactional(readOnly = true)
 @Log4j2
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class DownholeDataService {
-    private DownholeDataRepository downholeDataRepository;
-    private DownholeDataMapperImpl downholeDataMapper;
+    private final DownholeDataRepository downholeDataRepository;
+    private final DownholeDataMapperImpl downholeDataMapper;
+
     @Transactional
     public Integer create(DownholeDataCreateDto downholeDataCreateDto) {
         var entity = downholeDataMapper.map(downholeDataCreateDto);
         log.info("Create method: " + entity);
         return downholeDataRepository.save(entity).getId();
     }
+
     @Transactional
     public boolean update(DownholeDataReadDto downholeDataReadDto) {
         var optional = downholeDataRepository.findById(downholeDataReadDto.id());
@@ -48,6 +50,7 @@ public class DownholeDataService {
         log.info("Find all method");
         return downholeDataRepository.findAll().stream().map(downholeDataMapper::map).toList();
     }
+
     @Transactional
     public boolean delete(Integer id) {
         var maybeUser = downholeDataRepository.findById(id);

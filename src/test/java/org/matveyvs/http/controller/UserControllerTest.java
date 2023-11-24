@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.matveyvs.dto.UserCreateDto;
+import org.matveyvs.entity.Role;
 import org.matveyvs.service.UserService;
 import org.matveyvs.service.config.annotation.IT;
 import org.matveyvs.utils.RandomWellDataBaseCreator;
@@ -23,6 +25,7 @@ class UserControllerTest {
     private final RandomWellDataBaseCreator randomWellDataBaseCreator;
     private final UserService userService;
     private final MockMvc mockMvc;
+    private static Integer userId;
 
 
     @BeforeEach
@@ -30,6 +33,17 @@ class UserControllerTest {
         if (userService.findAll().isEmpty()) {
             randomWellDataBaseCreator.createRandomDataForTests();
         }
+        userId = userService.create(getUser());
+    }
+
+    private UserCreateDto getUser() {
+        return new UserCreateDto(
+                "username service",
+                "email@email.com",
+                "password service",
+                Role.USER,
+                "Matvey",
+                "Test");
     }
 
     @AfterEach
@@ -54,7 +68,7 @@ class UserControllerTest {
     void getAllWithSort() throws Exception {
         int pageNumber = 1;
         mockMvc.perform(get("/users/page/{pageNumber}", pageNumber)
-                        .flashAttr("pageNumber", 1)
+                        .flashAttr("pageNumber", pageNumber)
                         .param("sortDir", "ASC")
                         .param("sortField", "id")
                         .param("keyword", ""))
@@ -107,15 +121,8 @@ class UserControllerTest {
     }
 
     @Test
-    void delete() throws Exception {
-        var failUserId = -1;
-        var successUserId = 1;
-        mockMvc.perform(MockMvcRequestBuilders.delete("/users/{id}/delete", failUserId))
-                .andExpectAll(
-                        status().is4xxClientError()
-                );
-
-        mockMvc.perform(MockMvcRequestBuilders.delete("/users/{id}/delete", successUserId))
+    void deleteSuccess() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/users/{id}/delete", userId))
                 .andExpectAll(
                         status().is3xxRedirection(),
                         redirectedUrl("/users")
@@ -123,29 +130,49 @@ class UserControllerTest {
     }
 
     @Test
-    void detailsAndEditById() throws Exception {
+    void deleteFail() throws Exception {
         var failUserId = -1;
-        var successUserId = 1;
-        mockMvc.perform(get("/userEdit/{id}", failUserId))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/users/{id}/delete", failUserId))
                 .andExpectAll(
                         status().is4xxClientError()
                 );
+    }
 
-        mockMvc.perform(get("/userEdit/{id}", successUserId))
-                .andExpect(model().attributeExists("user"))
-                .andExpect(model().attributeExists("roles"))
-                .andExpect(view().name("/admin/userEdit"))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(get("/userDetails/{id}", failUserId))
-                .andExpectAll(
-                        status().is4xxClientError()
-                );
-
-        mockMvc.perform(get("/userDetails/{id}", successUserId))
+    @Test
+    void detailsByIdSuccess() throws Exception {
+        mockMvc.perform(get("/userDetails/{id}", userId)
+                        .flashAttr("id", 1))
                 .andExpect(model().attributeExists("user"))
                 .andExpect(model().attributeExists("roles"))
                 .andExpect(view().name("/admin/userDetails"))
                 .andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    void editByIdSuccess() throws Exception {
+        mockMvc.perform(get("/userEdit/{successUserId}", userId)
+                        .flashAttr("successUserId", userId))
+                .andExpect(model().attributeExists("user"))
+                .andExpect(model().attributeExists("roles"))
+                .andExpect(view().name("/admin/userEdit"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void detailsByIdFail() throws Exception {
+        var failUserId = -1;
+        mockMvc.perform(get("/userDetails/{id}", failUserId))
+                .andExpectAll(
+                        status().is4xxClientError()
+                );
+    }
+
+    @Test
+    void editByIdFail() throws Exception {
+        var failUserId = -1;
+        mockMvc.perform(get("/userEdit/{id}", failUserId))
+                .andExpectAll(
+                        status().is4xxClientError()
+                );
     }
 }
